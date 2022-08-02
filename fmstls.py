@@ -196,11 +196,13 @@ def fpyinputCell_value(sheet, r, col, vl):
  
 #fpyifNone_inputCell_value#
 """
-fpyifNone_inputCell_value:if Cellvalue is None,  input value to the Cell
-v1.00
-2022/2/5
+fpyifNone_inputCell_value:
+    if Cellvalue is None,  input value to the Cell
+    v1.00
+    2022/2/5
 
-@author: inoue
+    @author: inoue
+    
 """
 def fpyifNone_inputCell_value(sheet, r, col, vl):
     """
