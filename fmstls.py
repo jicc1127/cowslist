@@ -27,7 +27,7 @@ def fpyopenxl(wbN, sheetN):
 
     Returns
     -------
-    None.
+    list : [wb, sheet]
 
     """
     
@@ -90,7 +90,7 @@ def fpyopencsv_rdata(csvN):
 
     Returns
     -------
-    None.
+    filename_data : list's list
 
     """
     #import csv
@@ -196,13 +196,11 @@ def fpyinputCell_value(sheet, r, col, vl):
  
 #fpyifNone_inputCell_value#
 """
-fpyifNone_inputCell_value:
-    if Cellvalue is None,  input value to the Cell
-    v1.00
-    2022/2/5
+fpyifNone_inputCell_value:if Cellvalue is None,  input value to the Cell
+v1.00
+2022/2/5
 
-    @author: inoue
-    
+@author: inoue
 """
 def fpyifNone_inputCell_value(sheet, r, col, vl):
     """
@@ -258,17 +256,17 @@ def fpyidNo_9to10( wbN, sheetN, col ):
     #import datetime
     
     wb = openpyxl.load_workbook(wbN)
-    sheetN = wb[sheetN]   #wb.get_sheet_by_name(sheetN)
-    max_row = sheetN.max_row
+    sheet = wb[sheetN]   #wb.get_sheet_by_name(sheetN)
+    max_row = sheet.max_row
         
     for row_num in range(2, max_row + 1):     #先頭行をスキップ
         
-        idNo = sheetN.cell(row=row_num, column=col).value
+        idNo = sheet.cell(row=row_num, column=col).value
         idNo = str(idNo)
         if len(idNo) == 9:
-            sheetN.cell(row=row_num, column=col).value = '0' + idNo 
+            sheet.cell(row=row_num, column=col).value = '0' + idNo 
         else:
-            sheetN.cell(row=row_num, column=col).value = idNo 
+            sheet.cell(row=row_num, column=col).value = idNo 
               
     
     wb.save(wbN)
@@ -318,6 +316,7 @@ def fpyNewSheet(wbN, sheetN, scolN, r):
      
     wb.save(wbN)
 
+#fpychgSheetTitle##########################################################
 """
 fpychgSheetTitle      :change ExcelSheet's title
 v1.0
@@ -347,6 +346,826 @@ def fpychgSheetTitle(wbN, sheetN, sheetN1):
     wb = wbobj[0]
     sheet = wbobj[1]
     sheet.title = sheetN1
+    wb.save(wbN)
+    
+#fpysheet_copy############################################################    
+"""
+fpysheet_copy : copy a worksheet with another sheetname
+    ｖ1.0
+2022/9/14
+@author: jicc
+"""
+
+#! python3
+def fpysheet_copy( wbN, sheetN, sheetN_ ):
+    """
+    
+    copy a worksheet with another sheetname
+    
+    Parameters
+    ----------
+    wbN : 　str  
+        対象となるExcelファイル名　ex. KT_RPDorg.xlsx
+    sheetN : str
+        対象となるsheet ex. yyyymmdd
+    sheetN_ : str
+        コピーしたsheet ex. yyyymmddout
+ 
+    Returns
+    -------
+    None.
+
+    """
+    #import openpyxl
+    
+    wb = openpyxl.load_workbook(wbN)
+    sheet = wb[sheetN]           
+    
+    sheet_ = wb.copy_worksheet(sheet)
+    sheet_.title = sheetN_
+        
+    wb.save(wbN)
+    
+#fpycol_blk_rowslist#########################################################
+"""
+fpycol_blk_rowslist : rows'list column data is blank
+    ｖ1.0
+2022/9/14
+@author: jicc
+"""
+
+#! python3
+def fpycol_blk_rows_list( wbN, sheetN, col ):
+    """
+    rows'list column data is blank
+    
+    Parameters
+    ----------
+    wbN : 　str  
+        対象となるExcelファイル名　ex. KT_RPDorg.xlsx
+    sheetN : str
+        対象となるsheet ex. yyyymmdd
+    col : int
+        column number of lastAI_date
+ 
+    Returns
+    -------
+    None.
+
+    """
+    #import openpyxl
+    #import chghistory
+    #import datetime
+    #import kt_ai
+    
+    wb = openpyxl.load_workbook(wbN)
+    sheet = wb[sheetN]           
+
+    max_row = sheet.max_row
+    rows_list = []
+    for row_num in range(2, max_row + 1): #先頭行をスキップ
+        clmn_data = sheet.cell(row=row_num, column=col).value
+        if clmn_data == None:
+            rows_list.append(row_num)
+    
+    return rows_list
+
+
+#fpycol_blk_rowslist_s#########################################################
+"""
+fpycol_blk_rowslist_s : rows'list column data is blank
+sheet version
+    ｖ1.0
+2022/9/14
+@author: jicc
+"""
+
+#! python3
+def fpycol_blk_rows_list_s( sheet, col ):
+    """
+    rows'list column data is blank
+    sheet version
+    
+    Parameters
+    ----------
+    sheet : worksheet.worksheet.Worksheet
+         worksheet object
+    col : int
+        column number of lastAI_date
+ 
+    Returns
+    -------
+    None.
+
+    """
+
+    max_row = sheet.max_row
+    rows_list = []
+    for row_num in range(2, max_row + 1): #先頭行をスキップ
+        clmn_data = sheet.cell(row=row_num, column=col).value
+        if clmn_data == None:
+            rows_list.append(row_num)
+    
+    return rows_list
+
+#fpycol_nonblk_rowslist######################################################
+"""
+fpycol_nonblk_rowslist : rows'list column data is not blank
+    ｖ1.0
+2022/9/14
+@author: jicc
+"""
+
+#! python3
+def fpycol_nonblk_rows_list( wbN, sheetN, col ):
+    """
+    rows'list column data is not blank
+    
+    Parameters
+    ----------
+    wbN : 　str  
+        対象となるExcelファイル名　ex. KT_RPDorg.xlsx
+    sheetN : str
+        対象となるsheet ex. yyyymmdd
+    col : int
+        column number of lastAI_date
+ 
+    Returns
+    -------
+    None.
+
+    """
+    #import openpyxl
+    #import chghistory
+    #import datetime
+    #import kt_ai
+    
+    wb = openpyxl.load_workbook(wbN)
+    sheet = wb[sheetN]           
+
+    max_row = sheet.max_row
+    rows_list = []
+    for row_num in range(2, max_row + 1): #先頭行をスキップ
+        clmn_data = sheet.cell(row=row_num, column=col).value
+        if clmn_data != None:
+            rows_list.append(row_num)
+    
+    return rows_list
+
+#fpycol_nonblk_rowslist_s######################################################
+"""
+fpycol_nonblk_rowslist_s : rows'list column data is not blank
+sheet version
+    ｖ1.0
+2022/9/14
+@author: jicc
+"""
+
+#! python3
+def fpycol_nonblk_rows_list_s( sheet, col ):
+    """
+    rows'list column data is not blank
+    sheet version
+    
+    Parameters
+    ----------
+    sheet : worksheet.worksheet.Worksheet
+         worksheet object
+    col : int
+        column number of lastAI_date
+ 
+    Returns
+    -------
+    None.
+
+    """
+
+    max_row = sheet.max_row
+    rows_list = []
+    for row_num in range(2, max_row + 1): #先頭行をスキップ
+        clmn_data = sheet.cell(row=row_num, column=col).value
+        if clmn_data != None:
+            rows_list.append(row_num)
+    
+    return rows_list
+
+#fpycol_cellv_s_rows_list#########################################################
+"""
+fpycol_cellv_s_rows_list : rows'list column data is a cell value
+    ｖ1.0
+2022/9/19
+@author: jicc
+"""
+
+#! python3
+def fpycol_cellv_s_rows_list( wbN, sheetN, col, cellv ):
+    """
+    rows'list column data is a cell value
+    
+    Parameters
+    ----------
+    wbN : 　str  
+        対象となるExcelファイル名　ex. KT_RPDorg.xlsx
+    sheetN : str
+        対象となるsheet ex. yyyymmdd
+    col : int
+        column number of lastAI_date
+    cellv : int, str, etc.
+        cellvalue in column col 
+ 
+    Returns
+    -------
+    None.
+
+    """
+    import openpyxl
+    #import chghistory
+    #import datetime
+    #import kt_ai
+    
+    wb = openpyxl.load_workbook(wbN)
+    sheet = wb[sheetN]           
+
+    rows_list = []
+    for row_num in range(2, sheet.max_row + 1): #先頭行をスキップ
+        clmn_data = sheet.cell(row=row_num, column=col).value
+        if clmn_data == cellv:
+            rows_list.append(row_num)
+    
+    return rows_list
+
+#fpycol_cellv_s_rows_list_s#########################################################
+"""
+fpycol_cellv_s_rows_list_s : rows'list column data is a cell value
+    ｖ1.0
+2022/9/19
+@author: jicc
+"""
+
+#! python3
+def fpycol_cellv_s_rows_list_s( sheet, col, cellv ):
+    """
+    rows'list column data is a cell value
+    sheet version
+    
+    Parameters
+    ----------
+    sheet : worksheet.worksheet.Worksheet
+         worksheet object
+    col : int
+        column number of lastAI_date
+    cellv : int, str, etc.
+        cellvalue in column col 
+ 
+    Returns
+    -------
+    None.
+
+    """
+ 
+    rows_list = []
+    for row_num in range(2, sheet.max_row + 1): #先頭行をスキップ
+        clmn_data = sheet.cell(row=row_num, column=col).value
+        if clmn_data == cellv:
+            rows_list.append(row_num)
+    
+    return rows_list
+
+#fpycol_cellvs_rows_list#########################################################
+"""
+fpycol_cellvs_rows_list : 
+    rows'list column data is a element of a cell values'list
+    cell values'list version
+    ｖ1.0
+    2022/9/19
+    @author: jicc
+"""
+
+#! python3
+def fpycol_cellvs_rows_list( wbN, sheetN, col, cellvs_lst ):
+    """
+    rows'list column data is a element of a cell values'list
+    cell values'list version
+    
+    Parameters
+    ----------
+    wbN : 　str  
+        対象となるExcelファイル名　ex. KT_RPDorg.xlsx
+    sheetN : str
+        対象となるsheet ex. yyyymmdd
+    col : int
+        column number of lastAI_date
+    cellvs_lst : list
+        cellvalues'list in column col ex. ['a','b','c'] 
+ 
+    Returns
+    -------
+    None.
+
+    """
+    import openpyxl
+     
+    wb = openpyxl.load_workbook(wbN)
+    sheet = wb[sheetN]           
+    lcellvs_lst = len(cellvs_lst)
+    
+    rows_list = []
+    for i in range(0, lcellvs_lst):
+        for row_num in range(2, sheet.max_row + 1): #先頭行をスキップ
+            clmn_data = sheet.cell(row=row_num, column=col).value
+            if clmn_data == cellvs_lst[i]:
+                rows_list.append(row_num)
+    rows_list.sort()
+    
+    return rows_list
+
+#fpycol_cellvs_rows_list_s#########################################################
+"""
+fpycol_cellvs_rows_list_s : 
+    rows'list column data is a element of a cell values'list
+    cell values'list version
+    sheet version
+    ｖ1.0
+    2022/9/19
+    @author: jicc
+"""
+#! python3
+def fpycol_cellvs_rows_list_s( sheet, col, cellvs_lst ):
+    """
+    rows'list column data is a element of a cell values'list
+    cell values'list version
+    sheet version
+    
+    Parameters
+    ----------
+    sheet : worksheet.worksheet.Worksheet
+         worksheet object
+    col : int
+        column number of lastAI_date
+    cellvs_lst : list
+        cellvalues'list in column col ex. ['a','b','c'] 
+ 
+    Returns
+    -------
+    None.
+
+    """
+    lcellvs_lst = len(cellvs_lst)
+    
+    rows_list = []
+    for i in range(0, lcellvs_lst):
+        for row_num in range(2, sheet.max_row + 1): #先頭行をスキップ
+            clmn_data = sheet.cell(row=row_num, column=col).value
+            if clmn_data == cellvs_lst[i]:
+                rows_list.append(row_num)
+    rows_list.sort()
+    
+    return rows_list
+
+#fpyxllst_rows_list#########################################################
+"""
+fpyxllst_rows_list : get rows'list from a list of a Excel sheet
+    ｖ1.0
+    2022/9/19
+    @author: jicc
+    
+"""
+#! python3
+def fpyxllst_rows_list( wbN, sheetN ):
+    """
+    get rows'list from a list of a Excel sheet
+    
+    Parameters
+    ----------
+    wbN : 　str  
+        対象となるExcelファイル名　ex. KT_RPDorg.xlsx
+    sheetN : str
+        対象となるsheet ex. yyyymmdd
+  
+    Returns
+    -------
+    rows_list : list
+
+    """
+    import openpyxl
+    
+    wb = openpyxl.load_workbook(wbN)
+    sheet = wb[sheetN]           
+     
+    rows_list = []
+    for row_num in range(2, sheet.max_row+1): #先頭行をスキップ
+
+        rows_list.append(row_num)
+        
+    return rows_list
+
+#fpyxllst_rows_list_s#########################################################
+"""
+fpyxllst_rows_list_s : get rows'list from a list of a Excel sheet
+                       sheet version 
+    ｖ1.0
+    2022/9/19
+    @author: jicc
+    
+"""
+#! python3
+def fpyxllst_rows_list_s( sheet ):
+    """
+    get rows'list from a list of a Excel sheet
+    sheet version
+    
+    Parameters
+    ----------
+    sheet : worksheet.worksheet.Worksheet
+         worksheet object
+  
+    Returns
+    -------
+    rows_list : list
+
+    """
+ 
+    rows_list = []
+    for row_num in range(2, sheet.max_row+1): #先頭行をスキップ
+
+        rows_list.append(row_num)
+        
+    return rows_list
+
+#fpyrm_smelems_frm_list#####################################################
+"""
+fpyrm_smelems_frm_list : remove some elements from a list
+    v1.0
+    2022/9/19
+    @author: inoue
+    
+"""
+def fpyrm_smelems_frm_list(lst0, lst1):
+    """
+    remove some elements from a list
+
+    Parameters
+    ----------
+    lst0 : list
+        list to be removed some elements
+    lst1 : list
+        elements'list to remove
+    Returns
+    -------
+    lst0 : list
+        
+    """
+    llst1 = len(lst1)
+    
+    for i in range(0, llst1):
+        
+        lst0.remove(lst1[i])
+        
+    return lst0
+
+#fpydelete_rows##############################################################
+"""
+fpydelete_rows : delete rows in rows_list
+    ｖ1.0
+2022/9/14
+@author: jicc
+"""
+
+#! python3
+def fpydelete_rows( wbN, sheetN, rows_list ):
+    """
+    delete rows in rows_list
+    
+    Parameters
+    ----------
+    wbN : 　str  
+        対象となるExcelファイル名　ex. KT_RPDorg.xlsx
+    sheetN : str
+        対象となるsheet ex. yyyymmdd
+    rows_list : list
+        rows list to delete
+ 
+    Returns
+    -------
+    None.
+
+    """
+    #import openpyxl
+    #import chghistory
+    #import datetime
+    #import kt_ai
+    
+    wb = openpyxl.load_workbook(wbN)
+    sheet = wb[sheetN]           
+
+    for row_num in reversed(rows_list): #list 降順
+        
+        sheet.delete_rows(row_num)
+    
+    wb.save(wbN)
+    
+#fpydelete_rows_s##############################################################
+"""
+fpydelete_rows_s : delete rows in rows_list
+sheet version
+    ｖ1.0
+2022/9/14
+@author: jicc
+"""
+
+#! python3
+def fpydelete_rows_s( sheet, rows_list ):
+    """
+    delete rows in rows_list
+    sheet version
+    Parameters
+    ----------
+    
+    sheet : worksheet.worksheet.Worksheet
+         worksheet object
+    rows_list : list
+        rows list to delete
+ 
+    Returns
+    -------
+    sheet : worksheet.worksheet.Worksheet
+
+    """
+
+    for row_num in reversed(rows_list): #list 降順
+        
+        sheet.delete_rows(row_num)
+    
+    return sheet
+
+#fpynumber_rows#############################################################
+"""
+fpynumber_rows : number rows in a column
+    ｖ1.0
+2022/9/16
+@author: jicc
+"""
+
+#! python3
+def fpynumber_rows( wbN, sheetN, col ):
+    """
+    number rows in a column
+    
+    Parameters
+    ----------
+    wbN : 　str  
+        対象となるExcelファイル名　ex. KT_RPDorg.xlsx
+    sheetN : str
+        対象となるsheet ex. yyyymmdd
+    col : int
+        column number to number rows
+ 
+    Returns
+    -------
+    None.
+
+    """
+    import openpyxl
+   
+    wb = openpyxl.load_workbook(wbN)
+    sheet = wb[sheetN]           
+    max_row = sheet.max_row
+    
+    for row_num in range(2, max_row + 1): #先頭行をスキップ
+        
+        sheet.cell(row=row_num, column=col).value = row_num - 1
+    
+    wb.save(wbN)
+
+#fpynumber_rows_s#############################################################
+"""
+fpynumber_rows : 
+    number rows in a column
+    sheet version
+    ｖ1.0
+2022/10/2
+@author: jicc
+"""
+
+#! python3
+def fpynumber_rows_s( sheet, col ):
+    """
+    number rows in a column
+    sheet version
+    
+    Parameters
+    ----------
+    sheet : worksheet.worksheet.Worksheet
+         worksheet object
+    col : int
+        column number to number rows
+ 
+    Returns
+    -------
+    None.
+
+    """
+        
+    max_row = sheet.max_row
+    
+    for row_num in range(2, max_row + 1): #先頭行をスキップ
+        
+        sheet.cell(row=row_num, column=col).value = row_num - 1
+   
+
+#fpylstNo_to_rowNo###########################################################
+"""
+fpylstNo_to_rowNo : 
+    get the row number of a list number element (list[0])
+    2022/9/23
+    v1.0
+    @author: inoue
+    
+"""
+def fpylstNo_to_rowNo(wbN, sheetN, col, lstNo):
+    """
+    get the row number of a list number element (list[0])
+
+    Parameters
+    ----------
+    wbN : str
+        ExcelFile Name   ex."KT_RPDorg.xlsx"
+    sheetN : str
+        sheet name       ex."yyyymmdd"
+    col : int
+       Excel list number's column  ex. 1 : AI_id
+    lstNo: int
+       listNo if a list   
+
+    Returns
+    -------
+   row_num : int
+       row number
+
+    """
+
+    #import fmstls
+     
+    
+    wbobj = fpyopenxl(wbN, sheetN)   #get Worksheet object
+    #wb = wbobj[0]
+    sheet = wbobj[1]
+       
+    for row_num in range(2, sheet.max_row+1):
+        line_id = fpygetCell_value(sheet, row_num, col)
+        #get Excel's line_id No  column 1 (col)
+        if line_id == lstNo:
+            return row_num
+            
+            break
+        else:
+            continue
+
+#fpylstNo_to_rowNo_s###########################################################
+"""
+fpylstNo_to_rowNo_s : 
+    get the row number of a list number element (list[0])
+    sheet version
+    2022/9/23
+    v1.0
+    @author: inoue
+    
+"""
+def fpylstNo_to_rowNo_s(sheet, col, lstNo):
+    """
+    get the row number of a list number element (list[0])
+
+    Parameters
+    ----------
+    sheet : worksheet.worksheet.Worksheet
+         worksheet object
+    col : int
+       Excel list number's column  ex. 1 : AI_id
+    lstNo: int
+       listNo if a list   
+
+    Returns
+    -------
+   row_num : int
+       row number
+
+    """
+    for row_num in range(2, sheet.max_row+1):
+        line_id = fpygetCell_value(sheet, row_num, col)
+        #get Excel's line_id No  column 1 (col)
+        if line_id == lstNo:
+            return row_num
+            
+            break
+        else:
+            continue
+
+#fpy_0nton###################################################################
+"""
+fpy_0nton : change str '0n' to 'n'
+    2023/8/12
+    v1.0
+    @author: jicc
+    
+"""
+def fpy_0nton( mn ):
+    """
+    change str '0n' to 'n'
+
+    Parameters
+    ----------
+    mn : str
+       string of two figures
+
+    Returns
+    -------
+    one figure or two figures
+
+    """
+    if mn[0] == '0':
+        mn = mn[1]
+    else:
+        mn = mn
+    
+    return mn
+
+#fpyymd_0mtom_0dtod_######################################################
+"""
+fpyymd_0mtom_0dtod_str : change str yyyy/0m/0d to datetime yyyy/m/d
+    2023/10/7
+    v1.0
+    @author: inoue
+
+"""
+def fpyymd_0mtom_0dtod_ ( yyyy_mm_dd ):
+    """
+    change str yyyy/0m/0d to str yyyy/m/d
+
+    Parameters
+    ----------
+    yyyy_mm_dd : str
+        
+    Returns
+    -------
+    str yyyy_mm_dd_
+
+    """
+    import datetime
+    date = yyyy_mm_dd.split('/')
+    date[1] = fpy_0nton( date[1] )
+    date[2] = fpy_0nton( date[2] )
+    yyyy_mm_dd_ = '/'.join(date)
+    yyyy_mm_dd_ = datetime.datetime.strptime( yyyy_mm_dd_, '%Y/%m/%d')
+    return yyyy_mm_dd_
+
+
+#fpyymd_0mtom_0dtod#########################################################
+"""
+fpyymd_0mtom_0dtod : change str yyyy/0m/0d to datetime yyyy/m/d
+    2023/8/12
+    v1.0
+    @author: inoue
+
+"""
+def fpyymd_0mtom_0dtod ( wbN, sheetN, col ):
+    """
+    change str yyyy/0m/0d to datetime yyyy/m/d
+
+    Parameters
+    ----------
+    wbN : str
+        ExcelFile Name   ex."KT_cowslist.xlsx"
+    sheetN : str
+        sheet name       ex."tmp"
+    col : int
+       Excel list number's column  ex. 7 : birthday
+
+    Returns
+    -------
+    None.
+
+    """
+    import openpyxl
+    import datetime
+    import fmstls
+    
+    wb = openpyxl.load_workbook(wbN)
+    sheet = wb[sheetN]
+    
+    for row_num in range(2, sheet.max_row + 1): #先頭行をスキップ
+        
+        clmn_data = sheet.cell(row=row_num, column=col).value
+        #birthday
+        if type(clmn_data) == str:
+            date = clmn_data.split('/')
+            date[1] = fmstls.fpy_0nton( date[1] )
+            date[2] = fmstls.fpy_0nton( date[2] )
+            clmn_data = '/'.join(date)
+            clmn_data = datetime.datetime.strptime( clmn_data, '%Y/%m/%d')
+            sheet.cell(row=row_num, column=col).value = clmn_data
+        else:
+            continue
+        
     wb.save(wbN)
 
 ######################################################################
@@ -388,5 +1207,78 @@ def fpyfmstlsReference():
     print('**fpychgSheetTitle(wbN, sheetN, sheetN1)')
     print('change ExcelSheet\'s title')
     print('....................................................................................')
-    print('--------------------------------------------------------------------2022/5/4 by jicc---------')
+    print('**fpysheet_copy( wbN, sheetN, sheetN_ )')
+    print('copy a worksheet with another sheetname')
+    print('....................................................................................')
+    print('**fpycol_blk_rows_list( wbN, sheetN, col )')
+    print('rows\'list column data is blank')
+    print('....................................................................................')
+    print('**fpycol_blk_rows_list_s( sheet, col )')
+    print('rows\'list column data is blank')
+    print('sheet version')
+    print('....................................................................................')
+    print('**fpycol_nonblk_rows_list( wbN, sheetN, col )')
+    print('rows\'list column data is not blank')
+    print('....................................................................................')
+    print('**fpycol_nonblk_rows_list_s( sheet, col )')
+    print('rows\'list column data is not blank')
+    print('sheet version')
+    print('....................................................................................')
+    print('**fpycol_cellv_s_rows_list( wbN, sheetN, col, cellv )')
+    print('rows\'list column data is a cell value')
+    print('....................................................................................')
+    print('**fpycol_cellv_s_rows_list_s( sheet, col, cellv )')
+    print('rows\'list column data is a cell value')
+    print('sheet version')
+    print('....................................................................................')
+    print('**fpycol_cellvs_rows_list( wbN, sheetN, col, cellvs_lst )')
+    print('rows\'list column data is cell values\'list')
+    print('cell values\'list version')
+    print('....................................................................................')
+    print('**fpycol_cellvs_rows_list_s( sheet, col, cellvs_lst )')
+    print('rows\'list column data is cell values\'list')
+    print('cell values\'list version')
+    print('sheet version')
+    print('....................................................................................')
+    print('**fpyxllst_rows_list( wbN, sheetN )')
+    print('get rows\'list from a list of a Excel sheet')
+    print('....................................................................................')
+    print('**fpyxllst_rows_list_s( sheet )')
+    print('get rows\'list from a list of a Excel sheet')
+    print('sheet version')
+    print('....................................................................................')
+    print('**fpyrm_smelems_frm_list(lst0, lst1)')
+    print('remove some elements from a list')
+    print('....................................................................................')
+    print('**fpydelete_rows( wbN, sheetN, rows_list )')
+    print('delete rows in rows_list')
+    print('....................................................................................')
+    print('**fpydelete_rows_s(  sheet, rows_list )')
+    print('delete rows in rows_list')
+    print('sheet version')
+    print('need to save workbook')
+    print('....................................................................................')
+    print('**fpynumber_rows( wbN, sheetN, col )')
+    print('number rows in a column')
+    print('....................................................................................')
+    print('**fpynumber_rows_s( sheet, col )')
+    print('number rows in a column')
+    print('sheet version')
+    print('....................................................................................')
+    print('**fpylstNo_to_rowNo(wbN, sheetN, col, lstNo)')
+    print('get the row number of a list number element (list[0])')
+    print('....................................................................................')
+    print('**fpylstNo_to_rowNo_s(sheet, col, lstNo)')
+    print('get the row number of a list number element (list[0])')
+    print('sheet version')
+    print('....................................................................................')
+    print('**fpy_0nton( mn )')
+    print('change str \'0n\' to \'n\'')
+    print('....................................................................................')
+    print('**fpyymd_0mtom_0dtod_str ( yyyy_mm_dd )')
+    print('change str yyyy/0m/0d to str yyyy/m/d')
+    print('....................................................................................')
+    print('**fpyymd_0mtom_0dtod ( wbN, sheetN, col )')
+    print('change str yyyy/0m/0d to datetime yyyy/m/d')
+    print('----------------------------------------------------------2023/8/12 by jicc---------')
     
