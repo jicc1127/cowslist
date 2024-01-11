@@ -1200,6 +1200,9 @@ fpyflag_dblrcd_1 : flag double record 1
    検索年月日追加のため, #*11->12 に変更
    v1.01
    2023/10/14
+   *) 第2indexを変更
+    v1.02
+    2024/1/3
    @author: inoue
    
 """
@@ -1227,8 +1230,8 @@ def fpyflag_dblrcd_1(xllists):
         for j in range(0, i+1):
             #print(xllists[j])
             if j!= i:
-                if xllists[i][1:5] == xllists[j][1:5] and xllists[i][7:10] \
-                == xllists[j][7:10]:
+                if xllists[i][1:6] == xllists[j][1:6] and xllists[i][7:11] \
+                == xllists[j][7:11]: #5 -> 6, 10 -> 11 に修正2024/1/3 *)
                 #LinNo と No 以外が一致したら v1.01
                 #clmn 13(list index 12) flg(0) 0->1とする
                     xllists[i][12] = 1          #*11->12 に変更
@@ -1496,10 +1499,14 @@ fpychk_drecords   :check doublue records
     検索年月日追加のため #* 11->12 に変更
     v1.01
     2023/10/14
+    add a parameter searchdate 
+    重複をのぞいた最終リストの検索年月日をすべてsearchdateにする　#**
+    v1.02
+    2024/1/6
     @author: inoue
     
 """
-def fpychk_drecords(wbN, sheetN):
+def fpychk_drecords(wbN, sheetN, searchdate):
     """
     check doublue records
     重複データを別シートに抜き出す
@@ -1509,6 +1516,8 @@ def fpychk_drecords(wbN, sheetN):
         Excelfile to check double data  '??_CowsHistory.xlsx'
     sheetN : str
         sheet name to check double data   '??Farm'
+    searchdate : str
+        'yyyy/mm/dd' 検索年月日
 
     Returns
     -------
@@ -1536,15 +1545,25 @@ def fpychk_drecords(wbN, sheetN):
     xllists0 = fpydel_dblrcd(xllists_01, 12, 0)      #*
     #print("xllists0")
     #print(xllists0)
+    
+    if type(searchdate) == str: #date = 'str'の場合datetimtに変換 #**
+        searchdate = fpystrtodatetime( searchdate )
+    lxllists0 = len(xllists0)
+    for i in range(0,lxllists0):
+        xllists0[i][11] = searchdate                            #**
+    #** 検索年月日をすべてserchdateにする
+        
+    print("xllists0")
+    print(xllists0)
     #重複していたデータのリスト
     xllists1 = fpydel_dblrcd(xllists_01, 12, 1)      #*
-    #print("xllists1")
-    #print(xllists1)
+    ##print(xllists1)
    
     xllists0 = fpydelclm_frm_lsts_lst(xllists0, 12)  #*
     #print("xllists0")
     #print(xllists0)
     #col 'flag'の削除
+    
     xllists1 = fpydelclm_frm_lsts_lst(xllists1, 12)  #*
     #print("xllists1")
     #print(xllists1)
@@ -1724,6 +1743,8 @@ fpyselect_newrecords   :select new records from transfer information
 v1.0
 2022/7/16
 
+注) fpyselect_newrecords_s の修正、v1.01,1.02が反映されていない。2024/1/5
+
 @author: inoue
 """
 def fpyselect_newrecords(wbN, sheetN, ncol, idno):
@@ -1805,8 +1826,10 @@ fpyselect_newrecords_s   :select new records from transfer information
     #*  change str yyyy/0m/0d to datetime yyyy/m/d
     v1.01
     2023/10/7
-
-@author: inoue
+    #** コメント修正、追加
+    v1.02
+    2024/1/5
+    @author: jicc
 """
 def fpyselect_newrecords_s(driver, sheet, ncol, idno):
     """
@@ -1829,21 +1852,23 @@ def fpyselect_newrecords_s(driver, sheet, ncol, idno):
     [[title], [[newrecord],..], [[overlapped record],..]] 
 
     """
-    #import chghistory
+    import chghistory
     import nlbcs
     #import time
     import fmstls
     
     #excelfileのデータをlists'listにする
-    xllists = fpyxllist_to_indlist_s(sheet, ncol, idno)
+    xllists = chghistory.fpyxllist_to_indlist_s(sheet, ncol, idno)
     #print("xllists")
     #print(xllists)
-    xllists = fpylstelemreplace_str(xllists, 10, '\u3000', ' ')
+    xllists = chghistory.fpylstelemreplace_str(xllists, 10, '\u3000', ' ')
     #list 10(11番目)の"氏名または名称"の全角空白を半角空白に変換 
     #print('xllists')
     #print(xllists)    
     trs_inf = nlbcs.fpytrsinf_to_list(driver, idno)
-    #lists' list [[title], [[newrecord],..], [[overlapped record],..]]
+    #lists' list [[title], [trsinf1],[trs_inf2],...]   #**
+    #print('trs_inf')
+    #print(trs_inf)
     
     l = len(trs_inf)
     for i in range(1,l): #*
@@ -1863,25 +1888,27 @@ def fpyselect_newrecords_s(driver, sheet, ncol, idno):
     trs_inf01 = [] #default
     #value"0"のカラムflagをすべてのリストに追加する
     #titleリストの最後にも0が追加されている
-    trs_inf_0 = fpyaddclm_to_lsts_lst(trs_inf, 0)
+    trs_inf_0 = chghistory.fpyaddclm_to_lsts_lst(trs_inf, 0)
     
     #xllistsにすでにあるlistのflagを0->1に変更する
     trs_inf_01 = fpyflag_dblrcd_1_(xllists, trs_inf_0)
     
     #list of new records　[[title], [newrecord], ...]
-    trs_inf0 = fpydel_dblrcd(trs_inf_01, 11, 0)
+    trs_inf0 = chghistory.fpydel_dblrcd(trs_inf_01, 11, 0)
     
     #list of overlapped records
-    trs_inf1 = fpydel_dblrcd(trs_inf_01, 11, 1)
+    trs_inf1 = chghistory.fpydel_dblrcd(trs_inf_01, 11, 1)
     
     #delete col 'flag'
-    trs_inf0 = fpydelclm_frm_lsts_lst(trs_inf0, 11)
+    trs_inf0 = chghistory.fpydelclm_frm_lsts_lst(trs_inf0, 11)
     
     #delete col 'flag'
-    trs_inf1 = fpydelclm_frm_lsts_lst(trs_inf1, 11)
+    trs_inf1 = chghistory.fpydelclm_frm_lsts_lst(trs_inf1, 11)
         
     trs_inf01.append(trs_inf0[0])  #[[title]]
-    trs_inf01.append(trs_inf0[1:]) #[[title], [[newrecords],..]]
+    trs_inf01.append(trs_inf0[1:]) 
+    #[title]を除く   #**
+    #[[title], [[newrecords],..]]
     trs_inf01.append(trs_inf1)     
     #[[title], [[newrecord],..], [[overlapped record],..]] 
     #print('trs_inf01')
@@ -2331,17 +2358,583 @@ def fpyelems_lstfrmxls_lst_s(sheet, coln):
             
         
     return elements        
+ 
+#fpyext_frmlsts_lst########################################################
+"""
+fpyext_frmlsts_lst:
+    extract specific name's lists from lists' list
+    ｖ1.00
+    2023/10/16
+    @author: jicc
+    
+"""
+def fpyext_frmlsts_lst(lst, index, name):
+    """
+    extract specific name's lists from lists' list
+
+    Parameters
+    ----------
+    lst : list
+        individual transfer information 
+    index : int
+        index number of an element : Farm name
+    name : str
+        Farm name
+
+    Returns
+    -------
+    list
+    extracted list
+
+    """
+    llst = len(lst)
+    lst_ = []
+    for i in range(0,llst):
+        
+        if lst[i][index] == name:
+            lst_.append(lst[i])
+        else:
+            continue
+    
+    return lst_
+
+#fpyarr_frmlsts_lst###########################################################
+"""
+fpyarr_frmlsts_lst : arrange an individual and specific name's lists 
+    個体の特定農場の異動情報を調整する
+    最後の転出情報がかけていた場合の調整
+    ex."転入" -> "搬入"の場合 : "搬入" -> "転出" とし、"住所", "氏名または名称"も変更し、
+    xllixts_ の最後に追加する。
+    注)xllists_ の中で、"転入" -> "転入" となって"転出"が欠けているいる場合は想定していない。
+    ｖ1.0
+    2023/12/16
+    1) reason_to_transfer == "出生"　or "転入" ->
+        reason_to_transfer == "出生" or reason_to_transfer == "転入"　に訂正
+    2) ixllists__No < lxllists ->  ixllists_No < ixllistsNo に変更
+    v1.01
+    2023/12/24
+    @author: jicc
+    
+"""
+
+def fpyarr_frmlsts_lst( xllists, xllists_):
+    """
+    arrange an individual and specific name's lists 
+
+    Parameters
+    ----------
+    xllists : list
+        a list of an individual transfer information
+    xlsists_ : list
+        a list of an individual and specific name's lists 
+     
+    Returns
+    -------
+    xllists_ : list
+
+    """
+    lxllists = len(xllists)
+    print("lxllists")
+    print(lxllists)
+
+    lxllists_ = len(xllists_)
+    print("lxllists_")
+    print(lxllists_)
+
+    reason_to_transfer = xllists_[lxllists_-1][7] 
+    #xllists_　最後の要素の"異動内容"
+    print("reason_to_transfer")
+    print(reason_to_transfer)
+ 
+    if reason_to_transfer == "出生" or reason_to_transfer == "転入": # 1)
+        
+        xllistsNo = xllists[lxllists-1][6] # 2)
+        #xllists　最後の要素の"No"
+        ixllistsNo = int(xllistsNo) # 2*)
+        
+        xllists_No = xllists_[lxllists_-1][6]
+        #xllists_　最後の要素の"No"
+        ixllists_No = int(xllists_No)
+        
+        if ixllists_No < ixllistsNo: # 2)
+            #xllists_の最後の要素のあとに、xllsitsの要素がある場合
+            # "転出"が記載されていなくて、他所に"搬入", "転入"など異動している。
+        
+            tmp = xllists[ixllists_No]
+            #xllistsで、xllists_最後の要素の次の要素
+            print('tmp')
+            print(tmp)
+            tmp[7] = "転出"  #"転出"に変更
+            tmp[9] = xllists_[lxllists_-1][9]   #"住所"を変更
+            tmp[10] = xllists_[lxllists_-1][10] #"氏名または名称"を変更
+            print('tmp')
+            print(tmp)
+        
+            xllists_.append(tmp) #tmpをxllists_に追加して、転出した状態にする。
+    
+    print("arranged xllists_")
+    print(xllists_)
+
+    return xllists_
+
+#fpyterms_in_farm############################################################
+"""
+fpyterms_in_farm:
+    get a list 'term in farm'
+    個体の牧場所属期間( a term in a farm)のリストを得る
+    注) 異動情報に転出がなく、直接搬入など他所へ異動になっている場合の処理がない
+    v1.0
+    2023/12/9
+    *)最後の転出情報がかけていた場合の調整
+    ex."転入" -> "搬入"の場合 : "搬入" -> "転出" とし、"住所", "氏名または名称"も変更し、
+    xllixts_ の最後に追加する。
+    v1.1
+    2023/12/16
+    動き不十分のため、#**) 以下を全面書き換え
+    v2.0
+    2023/12/29
+    by jicc
+    
+"""
+def fpyterms_in_farm( wbN, sheetN, ncol, idno, name ):
+    """
+    get a list 'term in farm'
+
+    Parameters
+    ----------
+    wbN : str
+        Excelfile's name : AB_cowshistory.xlsx
+    sheetN : str
+        sheet name : ABFarm
+    ncol : int
+        number of columns 列数 : 12
+    idno : str
+        idNo 個体識別番号 : "0123456789"
+    name : str
+        氏名または名称　
+
+    Returns
+    -------
+    terms_in_farm : list
+        lists' list :[['出生'or'転入'の年月日, '転出','死亡'の年月日 or None],..] 
+
+    """
+    #from jiccModule import chghistory
+    import chghistory
+    #import openpyxl
+    
+    wbobj = chghistory.fpyopenxl(wbN, sheetN)   #get Worksheet object
+    #wb = wbobj[0]
+    sheet = wbobj[1]
+    
+    xllists = fpyxllist_to_indlist_s(sheet, ncol, idno)
+    #個体識別番号 idNo の異動情報のリスト
+    print("xllists")
+    print(xllists)
+    #lxllists = len(xllists)
+    xllists.sort(key = lambda x:x[8]) #, reverse=True
+    #lists' listを 異動年月日 昇順 でsort lambda関数を利用
+       
+    xllists_ = fpyext_frmlsts_lst(xllists, 10, name)
+    #index 10 : "氏名または名称"
+    #当該牧場の異動情報だけ抽出
+
+    xllists_.sort(key = lambda x:x[8]) #, reverse=True
+    #lists' listを 異動年月日 昇順 でsort lambda関数を利用
+    
+    print("xllists_")
+    print(xllists_)
+    
+    xllists_ = chghistory.fpyarr_frmlsts_lst( xllists, xllists_)   # *)
+    #最後の"転出"が欠けていた場合の調整
+    print("arrxllists_")
+    print(xllists_)
+    
+    #term_in_farm = []   #term_in_farm default
+    #['出生'or'転入'の年月日, '転出'or'死亡'の年月日]　個体の牧場　1所属期間
+    #terms_in_farm = []  #terms_in_farm default
+    #　個体の牧場所属期間のすべてのリスト
+    
+    #**) v2.0
+    lxllists_ = len(xllists_) #異動情報の要素数 
+    
+    #l_2 = lxllists_ // 2        #a divisor of lxllists_ by 2
+    l_2_res = lxllists_ % 2     # a residural of lxllists_ by 2
+    
+    tmp = [] #異動年月日 昇順のリスト default
+    terms_in_farm = []  #terms_in_farm default
+    #　個体の牧場所属期間のすべてのリスト lists' list
+    
+    if l_2_res == 0: #異動情報の要素数が偶数 : 転出済の個体
+        
+        #異動年月日 昇順 のリスト tmp を作成
+        for i in range(1,lxllists_+1):
+            tmp.append(xllists_[0][8])
+            del xllists_[0]
+            
+        #所属期間 ['出生'or'転入'の年月日, '転出'or'死亡'の年月日]
+        #のリスト terms_in_farm(lists' list)を作成
+        ltmp = len(tmp)
+        lterms_in_farm = ltmp // 2
+        for j in range(1,lterms_in_farm+1):
+            terms_in_farm.append(tmp[0:2])  #term_in_farm
+            del tmp[0:2]
+        print('tmp')
+        print(tmp)
+        #print(idno)        
+        print("terms_in_farm")
+        print(terms_in_farm)
+        
+    elif l_2_res == 1:  #異動情報の要素数が奇数 : 所属している個体(転出していない)
+    
+        #異動年月日 昇順 のリスト tmp を作成
+        for i in range(1,lxllists_+1):
+            tmp.append(xllists_[0][8])
+            del xllists_[0]
+        
+        #最後の転入以前の
+        #所属期間 ['出生'or'転入'の年月日, '転出'or'死亡'の年月日]
+        #のリスト terms_in_farm(lists' list)を作成
+        ltmp = len(tmp)
+        lterms_in_farm = ltmp // 2
+        for j in range(1,lterms_in_farm+1):
+            terms_in_farm.append(tmp[0:2])  #term_in_farm
+            del tmp[0:2]
+        
+        print('tmp')
+        print(tmp)
+        print('terms_in_farm')
+        print(terms_in_farm)
+        
+        #最後の転入(出生)の年月日だけ残っているtmpに、
+        #None(転出していない) を加える        
+        tmp.append(None)
+        #最後の所属期間 ['出生'or'転入'の年月日, None] を加える。
+        terms_in_farm.append(tmp[0:2])
+        del tmp[0:2]
+        print('tmp')
+        print(tmp)
+        #print(idno)        
+        print("terms_in_farm")
+        print(terms_in_farm)
+ 
+    return terms_in_farm
+
+#fpyterms_in_farm_############################################################
+"""
+fpyterms_in_farm_:
+    get a list 'term in farm'
+    a parameter is a list only
+    v1.0
+    2023/12/19
+    動き不十分のため、全面書き換え
+    v2.0
+    2023/12/29
+    by jicc
+    
+"""
+def fpyterms_in_farm_( xllists_ ):
+    """
+    get a list 'term in farm'
+
+    Parameters
+    ----------
+    xlsists_ : list
+        an individual transfer informations' list at a specific farm 
+        個体の特定の農場での異動情報のリスト
+        注) リストは、異動年月日昇順であることが必要 必要なら　#*)を使用する
+    Returns
+    -------
+    terms_in_farm : list
+        lists' list :[['出生'or'転入'の年月日, '転出','死亡'の年月日 or None],..] 
+
+    """
+    #term_in_farm = [] default
+    #['出生'or'転入'の年月日, '転出'or'死亡'の年月日]　個体の牧場　1所属期間
+    
+    #xllists_.sort(key = lambda x:x[8]) #, reverse=True  #*)
+    #lists' listを 異動年月日 昇順 でsort lambda関数を利用
+    
+    lxllists_ = len(xllists_) #異動情報の要素数
+    
+    #l_2 = lxllists_ // 2        #a divisor of lxllists_ by 2
+    l_2_res = lxllists_ % 2     # a residural of lxllists_ by 2
+    
+    tmp = [] #異動年月日 昇順のリスト default
+    terms_in_farm = []  #terms_in_farm default
+    #　個体の牧場所属期間のすべてのリスト lists' list
+    
+    if l_2_res == 0: #異動情報の要素数が偶数 : 転出済の個体
+        
+        #異動年月日 昇順 のリスト tmp を作成
+        for i in range(1,lxllists_+1):
+            tmp.append(xllists_[0][8])
+            del xllists_[0]
+            
+        #所属期間 ['出生'or'転入'の年月日, '転出'or'死亡'の年月日]
+        #のリスト terms_in_farm(lists' list)を作成
+        ltmp = len(tmp)
+        lterms_in_farm = ltmp // 2
+        for j in range(1,lterms_in_farm+1):
+            terms_in_farm.append(tmp[0:2])  #term_in_farm
+            del tmp[0:2]
+        print('tmp')
+        print(tmp)
+        #print(idno)        
+        print("terms_in_farm")
+        print(terms_in_farm)
+        
+    elif l_2_res == 1:  #異動情報の要素数が奇数 : 所属している個体(転出していない)
+    
+        #異動年月日 昇順 のリスト tmp を作成
+        for i in range(1,lxllists_+1):
+            tmp.append(xllists_[0][8])
+            del xllists_[0]
+        
+        #最後の転入以前の
+        #所属期間 ['出生'or'転入'の年月日, '転出'or'死亡'の年月日]
+        #のリスト terms_in_farm(lists' list)を作成
+        ltmp = len(tmp)
+        lterms_in_farm = ltmp // 2
+        for j in range(1,lterms_in_farm+1):
+            terms_in_farm.append(tmp[0:2])  #term_in_farm
+            del tmp[0:2]
+        
+        print('tmp')
+        print(tmp)
+        print('terms_in_farm')
+        print(terms_in_farm)
+        
+        #最後の転入(出生)の年月日だけ残っているtmpに、
+        #None(転出していない) を加える        
+        tmp.append(None)
+        #最後の所属期間 ['出生'or'転入'の年月日, None] を加える。
+        terms_in_farm.append(tmp[0:2])
+        del tmp[0:2]
+        print('tmp')
+        print(tmp)
+        #print(idno)        
+        print("terms_in_farm")
+        print(terms_in_farm)
+ 
+    return terms_in_farm
+
+#fpybelong_or_not############################################################
+"""
+fpybelong_or_not : check a base date belongs to a period or not
+    this function needs to import datetime
+    v1.0
+    20232/12/17
+    @author: jicc
+    
+"""
+def fpybelong_or_not( bdate, term ):
+    '''
+    check a base date belongs to a period or not
+
+    Parameters
+    ----------
+    bdate : datetime.datetime
+        base date
+    term : list
+        a belonging period:[in(datetime.datetime), out(datetime.datetime)] 
+
+    Returns
+    -------
+    int belong_or_not : belong ==1, not == 0
+
+    '''
+    belong_or_not = None        #dfault
+    
+    if term[1] == None:
+        if bdate >= term[0]:
+            belong_or_not = 1
+        elif bdate < term[0]:
+            belong_or_not = 0
+    
+    else: 
+    
+        if bdate >= term[0] and bdate < term[1]:
+        
+            belong_or_not = 1
+    
+        elif bdate < term[0] or bdate >= term[1]:
+        
+            belong_or_not = 0
+        
+    
+    return belong_or_not
+
+#fpyind_belongornot#########################################################
+"""
+fpyind_belongornot : 
+    an individual belongs to a farm or not at a base date
+    this function needs to import datetime
+    v1.0
+    2023/12/19
+    @author: jicc
+    
+"""
+def fpyind_belongornot(bdate, terms):
+    """
+    
+    an individual belongs to a farm or not at a base date
+
+    Parameters
+    ----------
+    bdate : datetime.datetime
+        base date
+    terms : lists' list'
+        belonging periods:
+            [[in(datetime.datetime), out(datetime.datetime)] , [...], ]
+
+    Returns
+    -------
+    int belong_or_not : belong ==1, not == 0
+
+    """
+    lterms = len(terms)
+    for i in range(0, lterms):
+        bn = fpybelong_or_not(bdate, terms[i])
+        if bn == 1:
+            break
+        elif bn == 0:
+            continue
+        
+    belongornot = bn
+    
+    return belongornot
+
+#fpysep_outfrmin#############################################################
+"""
+fpysep_outfrmin
+    separate move-out cows from move-in 
+    異動情報のExcelfile: AB_cowshistory.xlsx の　sheet　ABFarmの情報を
+    基準日における所属牛（転入牛move-in)と転出牛(move-out)の情報に分け、
+    2枚のsheet ABFarmin, ABFarmout を作成する
+    注) 使用前に２枚のsheet sheetN+'in'と sheetN+'out'を作成しておくこと
+        chghistory.fpymkxlsheet(wbN, sheetN, scolN, r)
+    v1.0
+    2024/1/2
+    @author: jicc
+    
+"""
+def fpysep_outfrmin( wbN, sheetN, coln, ncol, index, name, bdate ):
+    """
+    separate move-out cows from move-in 
+
+    Parameters
+    ----------
+    wbN : str
+        Excelfile to check move-in or move-out data  
+        'AB_cowshistory.xlsx'　対象のエクセルファイル名
+    sheetN : str
+        sheet name to separate move-out cows from move-in
+        'ABFarm'　対象のエクセルシート名
+    coln : int
+        column's number of idNo 個体識別番号の入っている列番号
+    ncol : int
+        number of columns sheet ABFarm のリストの列数
+    index : int
+        index number of an element(Farm name)　
+        リスト上の　'氏名または名称'のindex番号
+    name : str
+        Farm name '氏名または名称'
+    bdate : str
+        base date 基準日
+
+    Returns
+    -------
+    None.
+
+    """
+
+    import openpyxl
+    import chghistory
+    import datetime
+
+    wb = openpyxl.load_workbook(wbN)
+    sheet = wb[sheetN]
+    sheetin = wb[sheetN + 'in']
+    sheetout = wb[sheetN + 'out']
+    
+    idNos = chghistory.fpyelems_lstfrmxls_lst_s(sheet, coln)
+    print('idNos')
+    print(idNos)
+
+    lidNos = len(idNos)
+
+    for i in range(0,lidNos):
+        
+        xllists = chghistory.fpyxllist_to_indlist_s(sheet, ncol, idNos[i])
+        #個体識別番号 idNo の異動情報のリスト
+        print("xllists")
+        print(xllists)
+        #lxllists = len(xllists)
+        xllists.sort(key = lambda x:x[8]) #, reverse=True
+        #lists' listを 異動年月日 昇順 でsort lambda関数を利用
            
+        xllists_ = chghistory.fpyext_frmlsts_lst(xllists, index, name)
+        #index 10 : "氏名または名称"
+        #当該牧場の異動情報だけ抽出
+
+        xllists_.sort(key = lambda x:x[8]) #, reverse=True
+        #lists' listを 異動年月日 昇順 でsort lambda関数を利用
+        
+        print("xllists_")
+        print(xllists_)
+        
+        xllists_ = chghistory.fpyarr_frmlsts_lst( xllists, xllists_ )   # *)
+        #最後の"転出"が欠けていた場合の調整
+        print("xllists_")
+        print(xllists_)
+        
+        xllists_org = []
+        
+        lxllists_ = len(xllists_)
+        for j in range(0,lxllists_):
+            xllists_org.append(xllists_[j])
+        
+        lxllists_org = len(xllists_org)
+            
+
+        terms_in_farm = chghistory.fpyterms_in_farm_( xllists_ )
+        print("terms_in_farm")
+        print(terms_in_farm)
+        
+        #bdate = '2023/12/31'
+        print(bdate)
+        if type(bdate) == str: 
+            bdate = datetime.datetime.strptime(bdate, '%Y/%m/%d')
+        print('bdate')
+        print(bdate)
+        
+        belongornot = chghistory.fpyind_belongornot( bdate, terms_in_farm )
+        print('belongornot')
+        print(belongornot)
+        
+        if belongornot == 0:
+            for k in range(0, lxllists_org):
+                chghistory.fpylisttoxls_s(xllists_org[k], 1, sheetout)
+                #wb.save('..\CD_cowshistory.xlsx')
+        
+        elif belongornot == 1:
+            for k in range(0, lxllists_org):
+                chghistory.fpylisttoxls_s(xllists_org[k], 1, sheetin)
+                #wb.save('..\CD_cowshistory.xlsx')
+                
+    wb.save(wbN)
+          
 #fpychghistoryReference###################################################################
 """
 fpychghistoryReference:         reference of chghistory's functions
-ｖ1.1
-2022/4/2
+ｖ2.0
+2024/1/2
 @author: jicc
 """
 def fpychghistoryReference():
     
-    print('-----chghistoryReference ---------------------------------------------------------v1.05------')
+    print('-----chghistoryReference ---------------------------------------------------------v2.00------')
     print('**fpyopenxl(wbN, sheetN)')
     print('Excelfile wbN.xlsx　sheet sheetN Open ')
     print('.............................................................................................')
@@ -2471,7 +3064,43 @@ def fpychghistoryReference():
     print('**fpyelems_lstfrmxls_lst(wbN, sheetN, coln)')
     print('  fpyelems_lstfrmxls_lst_s(sheet, coln)')
     print('make an elements\' list from Excel\'s list')
-    print('--------------------------------------------------------------------2023/10/1　by jicc---------')
+    print('....................................................................................')
+    print('**fpyext_frmlsts_lst(lst, index, name)')
+    print('extract specific name\'s lists from lists\' list')
+    print('個体異動情報リストの、特定農場だけの異動情報を抽出する')
+    print('....................................................................................')
+    print('**fpyarr_frmlsts_lst( xllists, xllists_)')
+    print('arrange an individual and specific name\'s lists ')
+    print('個体の特定農場の異動情報を調整する,最後の転出情報がかけていた場合の調整')
+    print('....................................................................................')
+    print('**fpyterms_in_farm( wbN, sheetN, ncol, idno, name )')
+    print('get a list \'term in farm\'')
+    print('個体の牧場所属期間( a term in a farm)のリストを得る')
+    print('注) 異動情報に転出がなく、直接搬入など他所へ異動になっている場合の処理がない')
+    print('....................................................................................')
+    print('**fpyterms_in_farm_( xllists_ )')
+    print('get a list \'term in farm\'')
+    print('個体の牧場所属期間( a term in a farm)のリストを得る')
+    print('a paramete is a list only')
+    print('....................................................................................')
+    print('**fpyterms_in_farm_( xllists_ )')
+    print('get a list \'term in farm\'')
+    print('parameter is one list(xllists_) only version')
+    print('....................................................................................')
+    print('**fpybelong_or_not( bdate, term )')
+    print('check a base date belongs to a period or not')
+    print('基準日(bdate)に個体がその所属期間に属しているかどうか')
+    print('....................................................................................')
+    print('**fpyind_belongornot( bdate, terms )')
+    print('an individual belongs to a farm or not at a base date')
+    print('基準日(bdate)に個体がその農場に属しているかどうか')
+    print('....................................................................................')
+    print('**fpysep_outfrmin( wbN, sheetN, coln, ncol, index, name, bdate )')
+    print('separate move-out cows from move-in ')
+    print('異動情報のExcelfile: AB_cowshistory.xlsx の　sheet　ABFarmの情報を')
+    print('基準日における所属牛（転入牛move-in)と転出牛(move-out)の情報に分け、')
+    print('2枚のsheet ABFarmin, ABFarmout を作成する')
+    print('----------------------------------------------------------2024/1/2　by jicc---------')
     
     
 """
@@ -2553,11 +3182,13 @@ def fpyCowsHistoryManualfrmweb():
 fpyCowsHistoryTools:                        tools
 ｖ1.0
 2022/7/29
+v1.01
+2024/1/7
 @author: jicc
 """
 def fpyCowsHistoryTools():
     
-    print('-----CowsHistoryTools---------------------------------------------------------v2.00-------')
+    print('-----CowsHistoryTools---------------------------------------------------------v2.01-------')
     print('牛の個体情報検索サービス 個体識別番号の検索から個体の異動情報を検索し、')
     print('Excelファイルにリスト化するための　Tool集')
     print(' ')
@@ -2576,10 +3207,10 @@ def fpyCowsHistoryTools():
     print('  wbN0 : cowshistory.xlsx, sheetN0 : ABFarm, colidno0 : 2 (column number fo idno0), ')
     print(' wbN1 : AB_cowslist.xlsx, sheetN1 : cowslist, colidno1 : 2 (column number fo idno1)')
     print(' ')
-    print('#fpychk_drecords(wbN, sheetN)')
+    print('#fpychk_drecords(wbN, sheetN, searchdate)')
     print('Excel個体情報リスト cowshistory/ABFarmの重複データをを削除する')
-    print('   PS> ps_fpychk_drecords_args.py wbN sheetN')
-    print(' wbN: ..\\AB_cowshistory.xlsx, sheetN:ABFarm')
+    print('   PS> ps_fpychk_drecords_args.py wbN sheetN searchdate')
+    print(' wbN: ..\\AB_cowshistory.xlsx, sheetN:ABFarm, searchdate:\'yyyy/mm/dd\'')
     print(' ')
     print('#fpydel_d_idNo(wbN, sheetN)')
     print('個体リスト AB_cowslist/ABFarmのidnoの重複データをを削除する')
@@ -2591,4 +3222,4 @@ def fpyCowsHistoryTools():
     print('カレントディレクトリに　path名のディレクトリが存在しなければ作成する')
     print('   PS> ps_fpymkd_path_args.py path')
     print(' path: .\\csvhistory, .\\bck etc')
-    print('---------------------------------------------------------------2023/9/27 by jicc---------')    
+    print('---------------------------------------------------------------2024/1/7 by jicc---------')    

@@ -198,6 +198,9 @@ fpyind_trsinf_to_cowslist:
     to cowslist
     v1.0
     2022/8/5
+    '検索年月日' -> fillin_date を追加　#*
+    v1.01
+    2024/1/5
     @author: jicc
     
     
@@ -254,7 +257,7 @@ def fpyind_trsinf_to_cowslist(wbN0, sheetN0,
         for row0 in range(2, max_row0+1):
             idno0 = fmstls.fpygetCell_value(sheet0, row0, colidno0)
             if idno1 == idno0:
-                xllists = chghistory.fpyxllist_to_indlist_s( sheet0, 11, idno0 )
+                xllists = chghistory.fpyxllist_to_indlist_s( sheet0, 12, idno0 )
                 xllists.sort(key = lambda x:x[8]) 
                 #lists' listを 異動年月日 昇順 でsort lambda関数を利用
                 #print('xllixts')
@@ -312,8 +315,10 @@ def fpyind_trsinf_to_cowslist(wbN0, sheetN0,
                             fmstls.fpyinputCell_value(sheet1, row1, 17, xllists[i][7])
                             #氏名または名称->to
                             fmstls.fpyinputCell_value(sheet1, row1, 18, xllists[i][10])
-                        
-    
+                    
+                    #'検索年月日' -> fillin_date
+                    fmstls.fpyinputCell_value(sheet1, row1, 20, xllists[i][11])  #*
+                    
     wb1.save(wbN1)
 
 '''
