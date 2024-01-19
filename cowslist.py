@@ -8,6 +8,8 @@ Tools for a Farm's cowslist operation
 """
 import openpyxl
 import datetime
+import chghistory
+import fmstls
 
 #fpyDF_cowslist#############################################################
 """
@@ -132,8 +134,8 @@ def fpyind_inf_to_cowslist(wbN0, sheetN0, colidno0, wbN1, sheetN1, colidno1):
     None.
 
     """
-    import chghistory
-    import fmstls
+    #import chghistory
+    #import fmstls
     
     wb0obj = chghistory.fpyopenxl(wbN0, sheetN0)
     #wb0 = wb0obj[0]
@@ -238,8 +240,8 @@ def fpyind_trsinf_to_cowslist(wbN0, sheetN0,
     None.
 
     """
-    import chghistory
-    import fmstls
+    #import chghistory
+    #import fmstls
     
     wb0obj = chghistory.fpyopenxl(wbN0, sheetN0)
     #wb0 = wb0obj[0]
@@ -321,6 +323,97 @@ def fpyind_trsinf_to_cowslist(wbN0, sheetN0,
                     
     wb1.save(wbN1)
 
+#fpysepclst_outfrmin#############################################################
+"""
+fpysepclst_outfrmin
+    separate move-out cows from move-in in a cowslist
+    cowslistのExcelfile: AB_cowslist.xlsx の　sheet　ABFarmの情報を
+    基準日における所属牛（転入牛move-in)と転出牛(move-out)の情報に分け、
+    2枚のsheet ABFarmin, ABFarmout を作成する
+    注) 使用前に２枚のsheet sheetN+'in'と sheetN+'out'を作成しておくこと
+        chghistory.fpymkxlsheet(wbN, sheetN, scolN, r)
+    v1.0
+    2024/1/19
+    @author: jicc
+    
+"""
+def fpysepclst_outfrmin( wbN, sheetN, ncol, index ):
+    """
+    separate move-out cows from move-in in a cowslist
+    
+
+    Parameters
+    ----------
+    wbN : str
+        Excelfile to check move-in or move-out data  
+        'AB_cowshistory.xlsx'　対象のエクセルファイル名
+    sheetN : str
+        sheet name to separate move-out cows from move-in
+        'ABFarm'　対象のエクセルシート名
+    ncol : int
+        number of columns sheet ABFarm のリストの列数 : 20
+    index : int
+        index number of an element(out_date)　
+        リスト上の　'out_date'のindex番号
+
+    Returns
+    -------
+    None.
+
+    """
+
+    #import openpyxl
+    #import chghistory
+    #import datetime
+
+    wb = openpyxl.load_workbook(wbN)
+    sheet = wb[sheetN]
+    sheetin = wb[sheetN + 'in']
+    sheetout = wb[sheetN + 'out']
+    
+    xllists = chghistory.fpyxllist_to_list_s(sheet, ncol)
+    print('xllists')
+    print(xllists[0])
+    print(xllists[1])
+    print(xllists[2])
+    
+    farmin = [] #default 所属牛（転入牛move-in)
+    farmout = [] #default 転出牛(move-out)
+    
+    lxllists = len(xllists)
+    for i in range(0,lxllists):
+        
+        out_date = xllists[i][index] #out_date
+        if type(out_date) == datetime.datetime:
+            farmout.append(xllists[i])
+        elif out_date == None:
+            farmin.append(xllists[i])
+        else:
+            xllists[i][18] = "check the value of column 16(out_date)"
+            #index 18 : note
+            farmin.append(xllists[i])
+
+    #print('farmout')
+    #for j in range(0,3):
+    #    print(farmout[j])
+    
+    #print('farmin')
+    #for k in range(0,3):
+    #    print(farmin[k])
+    
+    lfarmin = len(farmin)
+    for j in range(0,lfarmin):
+        
+        chghistory.fpylisttoxls_s(farmin[j], 1, sheetin)
+    
+    lfarmout = len(farmout)
+    for k in range(0,lfarmout):
+        
+        chghistory.fpylisttoxls_s(farmout[k], 1, sheetout)
+        
+                
+    wb.save(wbN)    
+
 '''
     AB_cowslist.xlsx 作成のための　PS用マニュアル
     v1.0 by jicc
@@ -363,3 +456,41 @@ def fpycowslistManual():
     print(' ')
     print('---------------------------------------------------------2022/8/5 by jicc---------')
     
+
+#fpycowslistManual00##########################################################    
+'''
+    fpycowslistManual00:
+    AB_cowslist.xlsx 作成のための　PS用マニュアル
+    v2.0 by jicc
+    2024/1/14 by jicc
+
+    AB_cowshistory.xlsx の個体情報、異動情報から　
+    cowslistyyyymmdd を作成する
+
+'''    
+def fpycowslistManual00():
+
+    print('-----cowslist Manual00---------------------------------------------------v2.0------')    
+    print('1.input individual informations from cowshistory\'s data to cowslist')
+    print(' PS> python ps_fpyind_inf_to_cowslist_args.py wbN0 sheetN0 colidno0 wbN1 sheetN1 colidno1')
+    print(' wbN0 : AB_cowshistory.xlsx, sheetN0 : ABFarm, colidno0 : 2 (column number fo idno0), ') 
+    print(' wbN1 : AB_cowslist.xlsx, sheetN1 : cowslist, colidno1 : 2 (column number fo idno1)')
+    print(' ')
+    print('2.input individual transfer informations from cowshistory\'s data to cowslist')
+    print(' PS> python ps_fpyind_trsinf_to_cowslist_args.py wbN0 sheetN0 colidno0')
+    print(' wbN1 sheetN1 colidno1 name')
+    print(' wbN0 : AB_cowshistory.xlsx, sheetN0 : ABFarm, colidno0 : 2 (column number fo idno0), ') 
+    print(' wbN1 : AB_cowslist.xlsx, sheetN1 : cowslist, colidno1 : 2 (column number fo idno1)')
+    print(' name : 氏名または名称')
+    print(' ')
+    print('3.make an ExcelSheet if it dose not exist')
+    print(' PS> python ps_fpymkxlsheet_args.py wbN sheetN scolN r')
+    print(' wbN: ..\AB_cowslist.xlsx, sheetN: ABFarmout, scolN: columns, r: 1')
+    print(' 2枚のsheet ABFarmin, ABFarmout がなければ、作成する ') 
+    print(' ')
+    print('4.separate move-out cows from move-in in a cowslist')
+    print(' PS> python ps_fpysepclst_outfrmin_args.py wbN sheetN ncol index')
+    print(' wbN: ..\AB_cowslist.xlsx, sheetN: ABFarmout, ncol: 20, r: index : 15')
+    print(' 基準日における所属牛（転入牛move-in)と転出牛(move-out)の情報に分け、 ') 
+    print(' 2枚のsheet ABFarmin, ABFarmout を作成する ')
+    print('---------------------------------------------------------2024/1/19 by jicc---------')
