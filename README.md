@@ -35,6 +35,7 @@ PS> python ps_fpysepclst_outfrmin_args.py wbN sheetN ncol index
 wbN: ..\AB_cowslist.xlsx, sheetN: ABFarm, ncol: 20, r: index : 15
 検索日における所属牛（転入牛move-in)と転出牛(move-out)の情報に分け、
 2枚のsheet ABFarmin, ABFarmout を作成する
+
 ---------------------------------------------------------2024/2/11 by jicc---------
 
 AB_cowslist.xlsx/cowslist : ABFarmのcowslist
