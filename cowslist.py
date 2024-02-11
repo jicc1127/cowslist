@@ -96,7 +96,7 @@ def fpyDF_cowslist( wbN, sheetorg, sheetN, fillinDate ):
 #fpyind_inf_to_cowlists#####################################################    
 """
 fpyind_inf_to_cowslist:
-    input individual informations fromcowshistory's data
+    input individual informations from cowshistory's data
     to cowslist
     v1.0
     2022/8/2
@@ -346,7 +346,7 @@ def fpysepclst_outfrmin( wbN, sheetN, ncol, index ):
     ----------
     wbN : str
         Excelfile to check move-in or move-out data  
-        'AB_cowshistory.xlsx'　対象のエクセルファイル名
+        'AB_cowslist.xlsx'　対象のエクセルファイル名
     sheetN : str
         sheet name to separate move-out cows from move-in
         'ABFarm'　対象のエクセルシート名
@@ -414,6 +414,162 @@ def fpysepclst_outfrmin( wbN, sheetN, ncol, index ):
                 
     wb.save(wbN)    
 
+#fpymod_cowslist############################################################
+"""
+fpymod_cowslist :  modify cowslist data from a new cowslist
+    
+    v1.0
+    2024/2/11
+    @author: jicc
+    
+"""
+def fpymod_cowslist( wbN, sheetN, snewN, ncol ):
+    """
+    modify cowslist data from a new cowslist
+
+    Parameters
+    ----------
+    wbN : str
+        Excelfile to check move-in or move-out data  
+        'AB_cowslist.xlsx'　対象のエクセルファイル名
+    sheetN : str
+        sheet name of an original cowslist(registered cows)
+        'cowslist', 'cowslist2024' etc 追加する対象のエクセルシート名
+    snewN : str
+        sheet name of a new cowslist
+        'cowslistyyyymmdd'
+    ncol : int
+        number of columns sheet cowslist のリストの列数 : 20
+
+    Returns
+    -------
+    None
+
+    """
+    #import openpyxl
+    #import chghistory
+    
+    wb = openpyxl.load_workbook(wbN)
+    sheet = wb[sheetN]
+    snew = wb[snewN]
+    
+    #sheet と　snew の Excel sheetを　それぞれ listにする
+    xllists = chghistory.fpyxllist_to_list_s(sheet, ncol)
+    xllists_new = chghistory.fpyxllist_to_list_s(snew, ncol)
+    
+    #リストのエレメント数 : the number of elements of each list
+    lxllists = len(xllists)
+    lxllists_new = len(xllists_new)
+    
+    for i in range(0, lxllists):
+        for j in range(0,lxllists_new):
+            #original idNo == new cows' idNo
+            if xllists[i][1] == xllists_new[j][1]:
+                #make a comparison between registered and new cows' eack element
+                for k in range(2,12):
+                    if xllists[i][k] != xllists_new[j][k]:
+                        #overwrite a new element
+                        xllists[i][k] = xllists_new[j][k]
+                    else:
+                        continue
+            else:
+                continue
+    
+    #overwrite a registered cows' sheet
+    chghistory.fpylisttoxls_s_ow(xllists, 1, sheet)
+    
+    wb.save(wbN)  
+
+#fpyreg_newcows##############################################################
+"""
+fpyreg_newcows : register new cows from a new cowslist
+    
+    v1.0
+    2024/2/11
+    @author: jicc
+    
+"""
+def fpyreg_newcows( wbN, sheetN, snewN, ncol ):
+    """
+    register new cows from a new cowslist
+
+    Parameters
+    ----------
+    wbN : str
+        Excelfile to check move-in or move-out data  
+        'AB_cowslist.xlsx'　対象のエクセルファイル名
+    sheetN : str
+        sheet name of an original cowslist
+        'cowslist', 'cowslist2024' etc 追加する対象のエクセルシート名
+    snewN : str
+        sheet name of a new cowslist
+        'cowslistyyyymmdd'
+    ncol : int
+        number of columns sheet cowslist のリストの列数 : 20
+
+    Returns
+    -------
+    None
+
+    """
+    #import openpyxl
+    #import chghistory
+    
+    wb = openpyxl.load_workbook(wbN)
+    sheet = wb[sheetN]
+    snew = wb[snewN]
+    
+    #sheet と　snew の Excel sheetを　それぞれ listにする
+    xllists = chghistory.fpyxllist_to_list_s(sheet, ncol)
+    xllists_new = chghistory.fpyxllist_to_list_s(snew, ncol)
+    
+    #リストのエレメント数 : the number of each list
+    lxllists = len(xllists)
+    lxllists_new = len(xllists_new)
+    
+    #振り分け用のlistの初期化　: 
+    xllists0 = []  #new cows list default
+    for h in range(0,lxllists_new):
+        xllists0.append(xllists_new[h])
+    #xllists0 = xllists_new とすると、
+    #xllists0, xllists_new ともにremoveされ　index errorが起こる 2024/2/9
+    
+    xllists1 = []   #registered cows list default
+    
+    #xllists01 = [xllists0, xllists1]
+    
+    #登録牛と新規牛を分ける
+    #separate new cows from registered cows
+    for i in range(0, lxllists):
+        for j in range(0,lxllists_new):
+            if xllists[i][1] == xllists_new[j][1]: #registered
+                #the idNo of xllixts[i]  equal th idNo of xllists_new[j]
+                xllists1.append(xllists_new[j]) #未使用
+                xllists0.remove(xllists_new[j])
+                break
+            else:
+                continue
+    
+    print('xllists0')
+    l0 = len(xllists0)
+    print(l0)
+    print(xllists0)
+    print('xllists1')
+    l1 = len(xllists1)
+    print(l1)
+    xllists1[1]
+    
+    #新規牛のcowlist_id を修正する : modify cowlist_id of xllists0[k][0]
+    l = lxllists+1
+    for k in range(0,l0):
+        xllists0[k][0] = l
+        l = l + 1
+    
+    #新規牛をExcelsheet cowslist追加 : add new cows to a cowslist
+    chghistory.fpylisttoxls_s_(xllists0, 1, sheet)
+    
+    wb.save(wbN) 
+
 '''
     AB_cowslist.xlsx 作成のための　PS用マニュアル
     v1.0 by jicc
@@ -470,7 +626,7 @@ def fpycowslistManual():
 '''    
 def fpycowslistManual00():
 
-    print('-----cowslist Manual00---------------------------------------------------v2.0------')    
+    print('-----cowslist Manual00---------------------------------------------------v2.1------')    
     print('1.input individual informations from cowshistory\'s data to cowslist')
     print(' PS> python ps_fpyind_inf_to_cowslist_args.py wbN0 sheetN0 colidno0 wbN1 sheetN1 colidno1')
     print(' wbN0 : AB_cowshistory.xlsx, sheetN0 : ABFarm, colidno0 : 2 (column number fo idno0), ') 
@@ -483,14 +639,24 @@ def fpycowslistManual00():
     print(' wbN1 : AB_cowslist.xlsx, sheetN1 : cowslist, colidno1 : 2 (column number fo idno1)')
     print(' name : 氏名または名称')
     print(' ')
-    print('3.make an ExcelSheet if it dose not exist')
+    print('3.modify cowslist data from a new cowslist')
+    print(' PS> python ps_fpymod_cowslist_args.py wbN sheetN snewN ncol')
+    print(' wbN: ..\AB_cowslist.xlsx, sheetN: cowslist, scolN: cowslist_new, ncol: 20')
+    print(' 新しい情報に変更があれば修正する ') 
+    print(' ')
+    print('4.register new cows from a new cowslist')
+    print(' PS> python ps_fpyreg_newcows_args.py wbN sheetN snewN ncol')
+    print(' wbN: ..\AB_cowslist.xlsx, sheetN: cowslist, scolN: cowslist_new, ncol: 20')
+    print(' 新規牛をExcelsheet cowslist追加 ')
+    print(' ')
+    print('5.make an ExcelSheet if it dose not exist')
     print(' PS> python ps_fpymkxlsheet_args.py wbN sheetN scolN r')
     print(' wbN: ..\AB_cowslist.xlsx, sheetN: ABFarmout, scolN: columns, r: 1')
     print(' 2枚のsheet ABFarmin, ABFarmout がなければ、作成する ') 
     print(' ')
-    print('4.separate move-out cows from move-in in a cowslist')
+    print('6.separate move-out cows from move-in in a cowslist')
     print(' PS> python ps_fpysepclst_outfrmin_args.py wbN sheetN ncol index')
-    print(' wbN: ..\AB_cowslist.xlsx, sheetN: ABFarmout, ncol: 20, r: index : 15')
-    print(' 基準日における所属牛（転入牛move-in)と転出牛(move-out)の情報に分け、 ') 
+    print(' wbN: ..\AB_cowslist.xlsx, sheetN: ABFarm, ncol: 20, r: index : 15')
+    print(' 検索日における所属牛（転入牛move-in)と転出牛(move-out)の情報に分け、 ') 
     print(' 2枚のsheet ABFarmin, ABFarmout を作成する ')
-    print('---------------------------------------------------------2024/1/19 by jicc---------')
+    print('---------------------------------------------------------2024/2/11 by jicc---------')
