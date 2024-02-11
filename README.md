@@ -1,6 +1,6 @@
 # cowslist
 PS C:\Users\inoue\Dropbox\rep\cowslist>  python ps_cowslistmanual00_args.py
------cowslist Manual00---------------------------------------------------v2.1------
+-----cowslist Manual00----------------------------------------v2.1------
 1.input individual informations from cowshistory's data to cowslist
 PS> python ps_fpyind_inf_to_cowslist_args.py wbN0 sheetN0 colidno0 wbN1 sheetN1 colidno1
 wbN0 : AB_cowshistory.xlsx, sheetN0 : ABFarm, colidno0 : 2 (column number fo idno0),
