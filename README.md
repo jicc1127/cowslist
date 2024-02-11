@@ -4,35 +4,50 @@ PS C:\Users\inoue\Dropbox\rep\cowslist>  python ps_cowslistmanual00_args.py
 -----cowslist Manual00----------------------------------------v2.1------
 
 1.input individual informations from cowshistory's data to cowslist
+
 PS> python ps_fpyind_inf_to_cowslist_args.py wbN0 sheetN0 colidno0 wbN1 sheetN1 colidno1
+
 wbN0 : AB_cowshistory.xlsx, sheetN0 : ABFarm, colidno0 : 2 (column number fo idno0),
 wbN1 : AB_cowslist.xlsx, sheetN1 : cowslist, colidno1 : 2 (column number fo idno1)
 
 2.input individual transfer informations from cowshistory's data to cowslist
+
 PS> python ps_fpyind_trsinf_to_cowslist_args.py wbN0 sheetN0 colidno0
+
 wbN1 sheetN1 colidno1 name
 wbN0 : AB_cowshistory.xlsx, sheetN0 : ABFarm, colidno0 : 2 (column number fo idno0),
 wbN1 : AB_cowslist.xlsx, sheetN1 : cowslist, colidno1 : 2 (column number fo idno1)
 name : 氏名または名称
 
 3.modify cowslist data from a new cowslist
+
 PS> python ps_fpymod_cowslist_args.py wbN sheetN snewN ncol
+
 wbN: ..\AB_cowslist.xlsx, sheetN: cowslist, scolN: cowslist_new, ncol: 20
+
 新しい情報に変更があれば修正する
 
 4.register new cows from a new cowslist
+
 PS> python ps_fpyreg_newcows_args.py wbN sheetN snewN ncol
+
 wbN: ..\AB_cowslist.xlsx, sheetN: cowslist, scolN: cowslist_new, ncol: 20
+
 新規牛をExcelsheet cowslist追加
 
 5.make an ExcelSheet if it dose not exist
+
 PS> python ps_fpymkxlsheet_args.py wbN sheetN scolN r
+
 wbN: ..\AB_cowslist.xlsx, sheetN: ABFarmout, scolN: columns, r: 1
 2枚のsheet ABFarmin, ABFarmout がなければ、作成する
 
 6.separate move-out cows from move-in in a cowslist
+
 PS> python ps_fpysepclst_outfrmin_args.py wbN sheetN ncol index
+
 wbN: ..\AB_cowslist.xlsx, sheetN: ABFarm, ncol: 20, r: index : 15
+
 検索日における所属牛（転入牛move-in)と転出牛(move-out)の情報に分け、
 2枚のsheet ABFarmin, ABFarmout を作成する
 
