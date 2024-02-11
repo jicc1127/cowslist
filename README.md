@@ -40,6 +40,7 @@ wbN: ..\AB_cowslist.xlsx, sheetN: cowslist, scolN: cowslist_new, ncol: 20
 PS> python ps_fpymkxlsheet_args.py wbN sheetN scolN r
 
 wbN: ..\AB_cowslist.xlsx, sheetN: ABFarmout, scolN: columns, r: 1
+
 2枚のsheet ABFarmin, ABFarmout がなければ、作成する
 
 6.separate move-out cows from move-in in a cowslist
