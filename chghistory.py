@@ -350,6 +350,59 @@ def fpymkxlsheet(wbN, sheetN, scolN, r):
      
     wb.save(wbN)
 
+#fpymkxlsheet_#############################################################
+"""
+fpymkxlsheet_ : make an ExcelSheet if it dose not exist
+    workbook version
+v1.0
+2024/2/18
+
+@author: inoue
+"""
+def fpymkxlsheet_(wb, sheetN, scolN, r):
+    """
+    make an ExcelSheet if it dose not exist
+    workbook version
+    Parameters
+    ----------
+    wb : workbook.workbook.Workbook
+         workbook object
+    sheetN : str
+        new sheet name  : 'ABFarmout'
+    scolN : str         シート名: "columns"
+        参照するシート
+	r : int		r行目 作成するcolumn行
+    
+    Returns
+    -------
+    sheet : worksheet object
+
+    """
+    #import openpyxl
+    
+    #wb = openpyxl.load_workbook(wbN)
+    #sheet = wbobj[1]
+    #sheet.title = sheetN1
+    snames = []
+    snames = wb.sheetnames #get_sheet_names()
+    print(snames)
+    
+    if sheetN not in snames:
+        wb.create_sheet(title=sheetN, index=0)
+        sheet = wb[sheetN]
+        scol = wb[scolN]
+        
+        maxcol = scol.max_column #sheet columnの最終列
+                
+        for i in range(1,maxcol+1):
+            sheet.cell(row=r, column=i).value = scol.cell(row=1, column=i).value
+        print("Sheet " +sheetN + " を作成しました。")
+    else:
+        sheet = wb[sheetN]
+        print("Sheet " +sheetN + " exists")
+     
+    return sheet
+
 #fpypdf_to_csv############################################################
 """
 fpypdf_to_csv
@@ -3197,6 +3250,10 @@ def fpychghistoryReference():
     print('....................................................................................')
     print('**fpymkxlsheet(wbN, sheetN, scolN, r)')
     print('make an ExcelSheet if it dose not exist')
+    print('....................................................................................')
+    print('**fpymkxlsheet_(wb, sheetN, scolN, r)')
+    print('make an ExcelSheet if it dose not exist')
+    print('workbook version')
     print('....................................................................................')
     print('**fpyelems_lstfrmxls_lst(wbN, sheetN, coln)')
     print('  fpyelems_lstfrmxls_lst_s(sheet, coln)')

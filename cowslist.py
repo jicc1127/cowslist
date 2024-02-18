@@ -328,7 +328,7 @@ def fpyind_trsinf_to_cowslist(wbN0, sheetN0,
 fpysepclst_outfrmin
     separate move-out cows from move-in in a cowslist
     cowslistのExcelfile: AB_cowslist.xlsx の　sheet　ABFarmの情報を
-    基準日における所属牛（転入牛move-in)と転出牛(move-out)の情報に分け、
+    基準日(最終検索日)における所属牛（転入牛move-in)と転出牛(move-out)の情報に分け、
     2枚のsheet ABFarmin, ABFarmout を作成する
     注) 使用前に２枚のsheet sheetN+'in'と sheetN+'out'を作成しておくこと
         chghistory.fpymkxlsheet(wbN, sheetN, scolN, r)
@@ -570,6 +570,150 @@ def fpyreg_newcows( wbN, sheetN, snewN, ncol ):
     
     wb.save(wbN) 
 
+#fpyext_cwslst_at_base_date####################################################
+"""
+fpyext_cwslst_at_base_date
+    extract a cowslist at a base_date in an original cowslist
+    original cowslist から　基準日のcowslistを抽出して、
+    基準日の cowslist sheet cowslistyyyy_mm_dd　を作成する
+    v1.0
+    2024/2/16
+    @author: jicc
+    
+"""
+def fpyext_cwslst_at_base_date( wbN0, sN0, coln0, ncol0, index, name, 
+                    wbN1, sN1, coln1, ncol1, bdate ):
+    """
+    extract a cowslist at a base_date in an original cowslist
+    original cowslist から　基準日のcowslistを抽出する
+    基準日の cowslist sheet cowslistyyyy_mm_dd　を作成する
+
+    Parameters
+    ----------
+    wbN0 : str
+        Excelfile to check move-in or move-out data  
+        'AB_cowshistory.xlsx'　異動情報収納ファイル
+    sN0 : str
+        sheet name of cows' history data 
+        'ABFarm'　異動情報をリストしたシート名
+    coln0 : int
+        column's number of idNo in sheet sN0 
+        sheet sN0 の個体識別番号の入っている列番号
+    ncol0 : int
+        number of columns of sheet sN0's list
+        sheet sN0 のリストの列数
+    index : int
+        index number of an element(Farm name)　
+        リスト上の　'氏名または名称'のindex番号
+    name : str
+        Farm name '氏名または名称'
+    wbN1 : str
+        Excelfile of a farm's cowslist
+        'AB_cowslist.xlsx'　cowslist 個体情報収納ファイル 
+    sN1 : str
+        sheet name of cowslist
+        'cowslist' , 'cowslist2024' etc　牧場の所属個体情報をリストしたシート名 
+    coln1 : int
+        column's number of idNo in sheet sN1 
+        sheet sN1 の個体識別番号の入っている列番号
+    ncol1 : int
+        number of columns of sheet sN1's list
+        sheet sN1 のリストの列数
+    bdate : str
+        base date 基準日
+
+    Returns
+    -------
+    None.
+
+    """
+    import openpyxl
+    import chghistory
+    import datetime
+
+    wb0 = openpyxl.load_workbook(wbN0) 
+    s0 = wb0[sN0]
+    
+    wb1 = openpyxl.load_workbook(wbN1)
+    s1 = wb1[sN1]
+    
+    bdate_ = chghistory.fpyreplace_str(bdate, '/', '_')
+    #print(bdate)
+    #print(bdate_)
+    sN2 = 'cowslist' + bdate_
+    #sheet名 sN2 のsheetがなければ作成する
+    s2 = chghistory.fpymkxlsheet_(wb1, sN2, 'columns', 1)
+    
+    #wb1.save(wbN1)
+    
+    #AB_cowslist.xlsx/cowslist(org)からリストを作成する
+    xllist1 = chghistory.fpyxllist_to_list_s(s1, ncol1)
+    
+    lxllist1 = len(xllist1)
+    
+    for i in range(0, lxllist1):
+        
+        xllists0 = chghistory.fpyxllist_to_indlist_s(s0, ncol0, xllist1[i][coln1-1])
+        #個体識別番号 idNo の異動情報のリスト
+        
+        if xllists0 == []:
+            idNotmp = xllist1[i][coln1-1]
+            print("xllists0")
+            print(xllists0)
+            print('cow ' + idNotmp + 'には、異動情報がありません。')
+        
+        else:
+        
+            #lxllists0 = len(xllists0)
+            xllists0.sort(key = lambda x:x[8]) #, reverse=True
+            #lists' listを 異動年月日 昇順 でsort lambda関数を利用
+            #No ([6])昇順でsortしたほうが良いかもしれない。2024/1/13
+        
+            xllists0_ =chghistory.fpyext_frmlsts_lst(xllists0, index, name)
+            #index 10 : "氏名または名称"
+            #当該牧場の異動情報だけ抽出
+
+            xllists0_.sort(key = lambda x:x[8]) #, reverse=True
+            #lists' listを 異動年月日 昇順 でsort lambda関数を利用
+        
+            #print("xllists0_")
+            #print(xllists0_)
+        
+            xllists0_ = chghistory.fpyarr_frmlsts_lst( xllists0, xllists0_ )   # *)
+            #最後の"転出"が欠けていた場合の調整
+            #print("xllists0_")
+            #print(xllists0_)
+        
+            terms_in_farm = chghistory.fpyterms_in_farm_( xllists0_ )
+            #当該牧場にいた滞在期間
+            #print("terms_in_farm")
+            #print(terms_in_farm)
+        
+            #bdate = '2023/12/31'
+            print(bdate)
+            #基準日
+            if type(bdate) == str: 
+                bdate = datetime.datetime.strptime(bdate, '%Y/%m/%d')
+                #datetimeに変換
+                #print('bdate')
+                #print(bdate)
+        
+            belongornot = chghistory.fpyind_belongornot( bdate, terms_in_farm )
+            #基準日にその農場に所属していたかどうか
+            #print('belongornot')
+            #print(belongornot)
+        
+            if belongornot == 0: #move-out
+                continue
+        
+            elif belongornot == 1: #move-in belonging
+            
+                chghistory.fpylisttoxls_s(xllist1[i], 1, s2)
+            
+                  
+    wb1.save(wbN1)
+
+#fpycowslistManual###########################################################
 '''
     AB_cowslist.xlsx 作成のための　PS用マニュアル
     v1.0 by jicc
@@ -626,7 +770,7 @@ def fpycowslistManual():
 '''    
 def fpycowslistManual00():
 
-    print('-----cowslist Manual00---------------------------------------------------v2.1------')    
+    print('-----cowslist Manual00---------------------------------------------------v2.2------')    
     print('1.input individual informations from cowshistory\'s data to cowslist')
     print(' PS> python ps_fpyind_inf_to_cowslist_args.py wbN0 sheetN0 colidno0 wbN1 sheetN1 colidno1')
     print(' wbN0 : AB_cowshistory.xlsx, sheetN0 : ABFarm, colidno0 : 2 (column number fo idno0), ') 
@@ -659,4 +803,18 @@ def fpycowslistManual00():
     print(' wbN: ..\AB_cowslist.xlsx, sheetN: ABFarm, ncol: 20, r: index : 15')
     print(' 検索日における所属牛（転入牛move-in)と転出牛(move-out)の情報に分け、 ') 
     print(' 2枚のsheet ABFarmin, ABFarmout を作成する ')
-    print('---------------------------------------------------------2024/2/11 by jicc---------')
+    print(' ')
+    print('7.extract a cowslist at a base_date in an original cowslist')
+    print(' PS>  ps_fpyext_cwslst_at_base_date_args.py wbN0 sN0 coln0 ncol0 index name')
+    print(' wbN1 sN1 coln1 ncol1 bdate')
+    print(' wbN0 : AB_cowshistory.xlsx, sN0 : ABFarm, coln0 : 2, ncol0 : 12,')
+    print(' index : 10, name : \'Farm name\', wbN1 : AB_cowslist.xlsx,')
+    print(' sN1 : cowslist2024, coln1 : 2, ncol1 : 20, bdate : 2024/1/14')
+    print(' original cowslist から　基準日のcowslistを抽出して、 ') 
+    print(' 基準日の cowslist sheet cowslistyyyy_mm_dd　を作成する')
+    print('---------------------------------------------------------2024/2/18 by jicc---------')
+    
+    
+    
+    
+    
