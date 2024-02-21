@@ -1089,6 +1089,36 @@ def fpy_0nton( mn ):
     
     return mn
 
+#fpy_nto0n###################################################################
+"""
+fpy_nto0n : change str 'n' to '0n'
+    2024/2/21
+    v1.0
+    @author: jicc
+    
+"""
+def fpy_nto0n( st ):
+    """
+    change str 'n' to '0n'
+
+    Parameters
+    ----------
+    st : str
+       string of one or two figures
+
+    Returns
+    -------
+    str : two figures mn or 0n
+
+    """
+    lst = len(st)
+    if lst == 1:
+        st = '0' + st
+    else:
+        st = st
+    
+    return st
+
 #fpyymd_0mtom_0dtod_######################################################
 """
 fpyymd_0mtom_0dtod_str : change str yyyy/0m/0d to datetime yyyy/m/d
@@ -1171,7 +1201,7 @@ def fpyymd_0mtom_0dtod ( wbN, sheetN, col ):
 ######################################################################
 def fpyfmstlsReference():
     
-    print('-----fmstlsReference ---------------------------------------------------------v1.0-------')
+    print('-----fmstlsReference ---------------------------------------------------------v1.01------')
     print('**fpyopenxl(wbN, sheetN)')
     print('Excelfile wbN.xlsx　sheet sheetN Open ')
     print('.............................................................................................')
@@ -1275,10 +1305,13 @@ def fpyfmstlsReference():
     print('**fpy_0nton( mn )')
     print('change str \'0n\' to \'n\'')
     print('....................................................................................')
+    print('**fpy_nto0n( st )')
+    print('change str \'n\' to \'0n\'')
+    print('....................................................................................')
     print('**fpyymd_0mtom_0dtod_str ( yyyy_mm_dd )')
     print('change str yyyy/0m/0d to str yyyy/m/d')
     print('....................................................................................')
     print('**fpyymd_0mtom_0dtod ( wbN, sheetN, col )')
     print('change str yyyy/0m/0d to datetime yyyy/m/d')
-    print('----------------------------------------------------------2023/8/12 by jicc---------')
+    print('----------------------------------------------------------2024/2/21 by jicc---------')
     
