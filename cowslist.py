@@ -578,6 +578,9 @@ fpyext_cwslst_at_base_date
     基準日の cowslist sheet cowslistyyyy_mm_dd　を作成する
     v1.0
     2024/2/16
+    基準日の cowslist sheet cowslistyyyymmdd　を作成するように変更 #*
+    v1.01
+    2024/2/25
     @author: jicc
     
 """
@@ -630,6 +633,7 @@ def fpyext_cwslst_at_base_date( wbN0, sN0, coln0, ncol0, index, name,
     import openpyxl
     import chghistory
     import datetime
+    import fmstls
 
     wb0 = openpyxl.load_workbook(wbN0) 
     s0 = wb0[sN0]
@@ -637,7 +641,8 @@ def fpyext_cwslst_at_base_date( wbN0, sN0, coln0, ncol0, index, name,
     wb1 = openpyxl.load_workbook(wbN1)
     s1 = wb1[sN1]
     
-    bdate_ = chghistory.fpyreplace_str(bdate, '/', '_')
+    #bdate_ = chghistory.fpyreplace_str(bdate, '/', '_')
+    bdate_ = fmstls.fpystrdate_to_yyyymmdd( bdate )   #*
     #print(bdate)
     #print(bdate_)
     sN2 = 'cowslist' + bdate_
