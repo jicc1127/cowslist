@@ -304,7 +304,10 @@ def fpymkd_path( path ):
 fpymkxlsheet : make an ExcelSheet if it dose not exist
 v1.0
 2023/9/30
-
+#* sheet.cell(row=r,..) -> sheet.cell(row=1,..)
+#  scol.cell(row=1,..) -> scol.cell(row=r,..) に訂正　#*
+v1.01
+2024/3/1
 @author: inoue
 """
 def fpymkxlsheet(wbN, sheetN, scolN, r):
@@ -342,8 +345,8 @@ def fpymkxlsheet(wbN, sheetN, scolN, r):
         
         maxcol = scol.max_column #sheet columnの最終列
                 
-        for i in range(1,maxcol+1):
-            sheet.cell(row=r, column=i).value = scol.cell(row=1, column=i).value
+        for i in range(1,maxcol+1): 
+            sheet.cell(row=1, column=i).value = scol.cell(row=r, column=i).value #*
         print("Sheet " +sheetN + " を作成しました。")
     else:
         print("Sheet " +sheetN + " exists")
@@ -356,6 +359,10 @@ fpymkxlsheet_ : make an ExcelSheet if it dose not exist
     workbook version
 v1.0
 2024/2/18
+#* sheet.cell(row=r,..) -> sheet.cell(row=1,..)
+#  scol.cell(row=1,..) -> scol.cell(row=r,..) に訂正　#*
+v1.01
+2024/3/1
 
 @author: inoue
 """
@@ -395,7 +402,7 @@ def fpymkxlsheet_(wb, sheetN, scolN, r):
         maxcol = scol.max_column #sheet columnの最終列
                 
         for i in range(1,maxcol+1):
-            sheet.cell(row=r, column=i).value = scol.cell(row=1, column=i).value
+            sheet.cell(row=1, column=i).value = scol.cell(row=r, column=i).value #*
         print("Sheet " +sheetN + " を作成しました。")
     else:
         sheet = wb[sheetN]
@@ -1182,6 +1189,48 @@ def fpyxllist_to_indlist_s_(sheet, ncol, idno):
             
     return xllists
 
+#fpylst_to_indlst############################################################
+"""
+fpylst_to_indlst : 
+    get an individual lists' list from Farm's lists' list
+    list version
+    v1.0
+    2024/3/2
+    @author: jicc
+"""
+
+def fpylst_to_indlst( xllists, idNo, index ):
+    """
+    get an individual lists' list from Farm's lists' list
+    list version
+
+    Parameters
+    ----------
+    xllists : list
+        a list of Farm's calving data
+    idNo : str
+        '0123456789' 個体識別番号
+    index : int
+        the index of the element idNo
+        リストの要素で、個体識別番号の入るインデックス
+    Returns
+    -------
+    list : cow idNo's data
+
+    """
+    lxllists = len(xllists) #the length of list xllists
+    
+    idNos_data = [] # a list of cow idNo's (calving) data : default
+    
+    for i in range( 0,lxllists ):
+        
+        if xllists[i][index] == idNo:
+            idNos_data.append(xllists[i])
+        else:
+            continue
+        
+    return idNos_data
+
 #fpyaddclm_to_lsts_lst####################################################
 """
 fpyaddclm_to_lsts_lst : 
@@ -1410,6 +1459,7 @@ def fpylisttoxls(xllist, fstcol, wbN, sheetN):
     ----------
     xllist : str
         list from original csvfile  'MH_???_History.csv'
+        [[..], [..],..]
     fstcol : int
         first column number to input data
     wbN : str
@@ -1468,6 +1518,7 @@ def fpylisttoxls_s(xllist, fstcol, sheet):
     ----------
     xllist : str
         list from original csvfile  'MH_???_History.csv'
+        [....]
     fstcol : int
         first column number to input data
    sheet : worksheet.worksheet.Worksheet
@@ -1520,6 +1571,7 @@ def fpylisttoxls_s_(xllist, fstcol, sheet):
     ----------
     xllist : str
         list from original csvfile  'MH_???_History.csv'
+        [[..], [..],..]
     fstcol : int
         first column number to input data
    sheet : worksheet.worksheet.Worksheet
@@ -3185,6 +3237,10 @@ def fpychghistoryReference():
     print('**fpyxllist_to_indlist_s_(sheet, ncol, idno)')
     print('arguments \'wbN, sheetN\' -> \'sheet\' worksheetobject version ')
     print('add Excel\'s rowNo to xllist[0]')
+    print('.............................................................................................')
+    print('get an individual lists\' list from Farm\'s lists\'list')
+    print('**fpylst_to_indlst( xllists, idNo, index )')
+    print('list version')
     print('.............................................................................................')
     print('**fpyaddclm_to_lsts_lst(xllists, colv)')
     print('lists\'listに最終カラムを追加する')

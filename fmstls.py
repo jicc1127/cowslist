@@ -1244,10 +1244,41 @@ def fpystrdate_to_yyyymmdd( date ):
     
     return yyyymmdd
 
+#fpyyyyymmdd_to_strdate######################################################
+"""
+fpyyyyymmdd_to_strdate : 
+    change str yyyymmdd to str date yyyy/mm/dd
+    v1.0
+    2024/3/2
+    @author: inoue
+    注) mm,dd で 0m,0d と 0 が残ることに注意
+"""
+def fpyyyyymmdd_to_strdate( yyyymmdd ):
+    """
+    change str yyyymmdd to str date yyyy/mm/dd
+
+    Parameters
+    ----------
+    
+    str : yyyymmdd
+
+    Returns
+    -------
+    strdate : str
+        yyyy/mm/dd
+    
+
+    """
+    
+    strdate = yyyymmdd[0:4] + '/' + yyyymmdd[4:6] + '/' +  yyyymmdd[6:8]
+
+    
+    return strdate
+
 ######################################################################
 def fpyfmstlsReference():
     
-    print('-----fmstlsReference ---------------------------------------------------------v1.02------')
+    print('-----fmstlsReference ---------------------------------------------------------v1.03------')
     print('**fpyopenxl(wbN, sheetN)')
     print('Excelfile wbN.xlsx　sheet sheetN Open ')
     print('.............................................................................................')
@@ -1362,5 +1393,8 @@ def fpyfmstlsReference():
     print('....................................................................................')
     print('**fpystrdate_to_yyyymmdd( date )')
     print('change str date yyyy/mm/dd to str yyyymmdd')
-    print('----------------------------------------------------------2024/2/25 by jicc---------')
+    print('....................................................................................')
+    print('**fpyyyyymmdd_to_strdate( yyyymmdd )')
+    print('change str yyyymmdd to str date yyyy/mm/dd')
+    print('----------------------------------------------------------2024/3/2 by jicc---------')
     
