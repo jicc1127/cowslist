@@ -466,7 +466,7 @@ def fpymod_cowslist( wbN, sheetN, snewN, ncol ):
             #original idNo == new cows' idNo
             if xllists[i][1] == xllists_new[j][1]:
                 #make a comparison between registered and new cows' eack element
-                for k in range(2,12):
+                for k in range(2,ncol):
                     if xllists[i][k] != xllists_new[j][k]:
                         #overwrite a new element
                         xllists[i][k] = xllists_new[j][k]
@@ -589,7 +589,7 @@ def fpyext_cwslst_at_base_date( wbN0, sN0, coln0, ncol0, index, name,
     """
     extract a cowslist at a base_date in an original cowslist
     original cowslist から　基準日のcowslistを抽出する
-    基準日の cowslist sheet cowslistyyyy_mm_dd　を作成する
+    基準日の cowslist sheet cowslistyyyymmdd　を作成する
 
     Parameters
     ----------

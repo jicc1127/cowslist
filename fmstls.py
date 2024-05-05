@@ -233,8 +233,6 @@ fpyidNo_9to10 : ９～10桁耳標の数値を文字列として、
 2021/4/29
 @author: jicc
 """
-
-#! python3
 def fpyidNo_9to10( wbN, sheetN, col ):
     """
     Parameters
@@ -271,6 +269,50 @@ def fpyidNo_9to10( wbN, sheetN, col ):
     
     wb.save(wbN)
     
+#fpyidNo_9to10_s#
+"""
+fpyidNo_9to10_s : ９～10桁耳標の数値を文字列として、
+    9桁の耳標に1桁目に０を加え10桁とする
+    sheet version
+ｖ1.0
+2021/4/29
+@author: jicc
+"""
+def fpyidNo_9to10_s( sheet, col ):
+    """
+    ９～10桁耳標の数値を文字列として、
+    9桁の耳標に1桁目に０を加え10桁とする
+    sheet version
+    Parameters
+    ----------
+    sheet : worksheet.worksheet.Worksheet
+         worksheet object　　　
+    col : int
+        変更する10桁耳標の列
+
+    Returns
+    -------
+    sheet : worksheet.worksheet.Worksheet
+         worksheet object
+
+    """
+       
+    #import openpyxl
+    #import datetime
+    
+    max_row = sheet.max_row
+        
+    for row_num in range(2, max_row + 1):     #先頭行をスキップ
+        
+        idNo = sheet.cell(row=row_num, column=col).value
+        idNo = str(idNo)
+        if len(idNo) == 9:
+            sheet.cell(row=row_num, column=col).value = '0' + idNo 
+        else:
+            sheet.cell(row=row_num, column=col).value = idNo 
+              
+    
+    return sheet
     
 #fpyNewSheet#
 """
@@ -315,6 +357,50 @@ def fpyNewSheet(wbN, sheetN, scolN, r):
     
      
     wb.save(wbN)
+    
+#fpyNewSheet_w############################################################
+"""
+fpyNewSheet : Excelbookに
+sheet　'columns'と同じ sheet　'scolN'を作成する。
+workbook version
+ｖ1.0
+2024/3/29
+
+@author: jicc
+
+"""
+def fpyNewSheet_w(wb, sheetN, scolN, r):
+    """
+    Excelbookに sheet 'scolN' r行目の'columns'を1行目に配置した sheet'sheetN'を作成する。
+    *sheet 'columns'(列名を記入したシート) を作成しておく
+    workbook version
+    Parameters
+    ----------
+    wb : 　workbook.workbook.workbook          
+        workbook objevt
+    sheetN : str　　　　　　シート名:"????" 
+        作成するシート
+    scolN : str         シート名: "columns"
+        参照するシート
+	r : int		r行目 作成するcolumn行
+    Returns
+    -------
+    sheet : worksheet.worksheet.worksheet
+        worksheet object
+
+    """
+    
+    wb.create_sheet(title=sheetN, index=0)
+    sheet = wb[sheetN]
+    scol = wb[scolN]
+    
+    maxcol = scol.max_column #sheet columnの最終列
+    
+    for i in range(1,maxcol+1):
+        sheet.cell(row=r, column=i).value = scol.cell(row=1, column=i).value
+    
+     
+    return sheet
 
 #fpychgSheetTitle##########################################################
 """
@@ -383,6 +469,12 @@ def fpysheet_copy( wbN, sheetN, sheetN_ ):
     
     sheet_ = wb.copy_worksheet(sheet)
     sheet_.title = sheetN_
+    
+    # シートを先頭へ移動
+    wb.move_sheet(sheet_, offset=-wb.index(sheet_))
+    
+    # 先頭のシートを再度選択状態にする
+    #wb.active = 0
         
     wb.save(wbN)
     
@@ -1278,7 +1370,7 @@ def fpyyyyymmdd_to_strdate( yyyymmdd ):
 ######################################################################
 def fpyfmstlsReference():
     
-    print('-----fmstlsReference ---------------------------------------------------------v1.03------')
+    print('-----fmstlsReference ---------------------------------------------------------v1.04------')
     print('**fpyopenxl(wbN, sheetN)')
     print('Excelfile wbN.xlsx　sheet sheetN Open ')
     print('.............................................................................................')
@@ -1310,6 +1402,11 @@ def fpyfmstlsReference():
     print('**fpyNewSheet(wbN, sheetN, scolN, r)')
     print('Excelbookに sheet　\'columns\'r行と同じ sheet　\'scolN\'を作成する')
     print(' wbN:workbooks_name,  sheetN:worksheets_name, scolN: columns_sheets_name')
+    print('....................................................................................')
+    print('**fpyNewSheet_w(wb, sheetN, scolN, r)')
+    print('Excelbookに sheet　\'columns\'r行と同じ sheet　\'scolN\'を作成する')
+    print('workbook version')
+    print(' wb:workbook object,  sheetN:worksheets_name, scolN: columns_sheets_name')
     print('....................................................................................')
     print('**fpychgSheetTitle(wbN, sheetN, sheetN1)')
     print('change ExcelSheet\'s title')
@@ -1396,5 +1493,5 @@ def fpyfmstlsReference():
     print('....................................................................................')
     print('**fpyyyyymmdd_to_strdate( yyyymmdd )')
     print('change str yyyymmdd to str date yyyy/mm/dd')
-    print('----------------------------------------------------------2024/3/2 by jicc---------')
+    print('----------------------------------------------------------2024/3/29 by jicc---------')
     

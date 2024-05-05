@@ -23,4 +23,4 @@ bdate = sys.argv[11]
 cowslist.fpyext_cwslst_at_base_date( wbN0, sN0, coln0, ncol0, index, name, 
                     wbN1, sN1, coln1, ncol1, bdate )
 
-print( wbN1+ "/"  + sN1 + "のcowslistの基準日における 所属牛をsheet cowslistyyyy_mm_ddに抽出しました。")
+print( wbN1+ "/"  + sN1 + "のcowslistの基準日における 所属牛をsheet cowslistyyyymmddに抽出しました。")
