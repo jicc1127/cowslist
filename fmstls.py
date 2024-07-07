@@ -463,7 +463,7 @@ def fpysheet_copy( wbN, sheetN, sheetN_ ):
 
     """
     #import openpyxl
-    
+       
     wb = openpyxl.load_workbook(wbN)
     sheet = wb[sheetN]           
     
@@ -477,6 +477,50 @@ def fpysheet_copy( wbN, sheetN, sheetN_ ):
     #wb.active = 0
         
     wb.save(wbN)
+
+#fpysheet_copy_ws############################################################    
+"""
+fpysheet_copy : copy a worksheet with another sheetname
+    ｖ1.0
+    2022/9/14
+    workbook sheet version
+    v1.0
+    2024/6/5
+    @author: jicc
+"""
+
+#! python3
+def fpysheet_copy_ws( wb, sheet, sheetN_ ):
+    """
+    
+    copy a worksheet with another sheetname
+    
+    Parameters
+    ----------
+    wb : workbook.workbook.Workbook
+         workbook object
+    sheet : worksheet.worksheet.Worksheet
+         worksheet object
+    sheetN_ : str
+        コピーしたsheetのsheet名 ex. yyyymmddout
+ 
+    Returns
+    -------
+    sheet_ : worksheet.worksheet.Worksheet
+         worksheet object
+
+    """
+    sheet_ = wb.copy_worksheet(sheet)
+    sheet_.title = sheetN_
+    
+    # シートを先頭へ移動
+    wb.move_sheet(sheet_, offset=-wb.index(sheet_))
+    
+    # 先頭のシートを再度選択状態にする
+    #wb.active = 0
+        
+    return sheet_ 
+
     
 #fpycol_blk_rowslist#########################################################
 """
@@ -1219,7 +1263,7 @@ fpyymd_0mtom_0dtod_str : change str yyyy/0m/0d to datetime yyyy/m/d
     @author: inoue
 
 """
-def fpyymd_0mtom_0dtod_ ( yyyy_mm_dd ):
+def fpyymd_0mtom_0dtod_( yyyy_mm_dd ):
     """
     change str yyyy/0m/0d to str yyyy/m/d
 
@@ -1249,7 +1293,7 @@ fpyymd_0mtom_0dtod : change str yyyy/0m/0d to datetime yyyy/m/d
     @author: inoue
 
 """
-def fpyymd_0mtom_0dtod ( wbN, sheetN, col ):
+def fpyymd_0mtom_0dtod( wbN, sheetN, col ):
     """
     change str yyyy/0m/0d to datetime yyyy/m/d
 
@@ -1370,19 +1414,19 @@ def fpyyyyymmdd_to_strdate( yyyymmdd ):
 ######################################################################
 def fpyfmstlsReference():
     
-    print('-----fmstlsReference ---------------------------------------------------------v1.04------')
+    print('-----fmstlsReference ---------------------------------------------------v1.05------')
     print('**fpyopenxl(wbN, sheetN)')
     print('Excelfile wbN.xlsx　sheet sheetN Open ')
-    print('.............................................................................................')
+    print('...................................................................................')
     print('**fpyopencsv_robj(csvN)')
     print('csvfile Open for Reader object')
-    print('.............................................................................................')
+    print('...................................................................................')
     print('**fpyopencsv_rdata(csvN)')
     print('csvfile Open for Reader data')
-    print('.............................................................................................')
+    print('..................................................................................')
     print('**fpyopencsv_w(csvN)')
     print('csvfile Open for Writer')
-    print('.............................................................................................')
+    print('....................................................................................')
     print('**fpygetCell_value(sheet, r, col)')
     print('Excelシート上のセルの値を取得する')
     print('get value from the target Cell on an Excelsheet')
@@ -1413,6 +1457,10 @@ def fpyfmstlsReference():
     print('....................................................................................')
     print('**fpysheet_copy( wbN, sheetN, sheetN_ )')
     print('copy a worksheet with another sheetname')
+    print('....................................................................................')
+    print('**fpysheet_copy_ws( wb, sheet, sheetN_ )')
+    print('copy a worksheet with another sheetname')
+    print('workbook sheet version')
     print('....................................................................................')
     print('**fpycol_blk_rows_list( wbN, sheetN, col )')
     print('rows\'list column data is blank')
@@ -1493,5 +1541,5 @@ def fpyfmstlsReference():
     print('....................................................................................')
     print('**fpyyyyymmdd_to_strdate( yyyymmdd )')
     print('change str yyyymmdd to str date yyyy/mm/dd')
-    print('----------------------------------------------------------2024/3/29 by jicc---------')
+    print('----------------------------------------------------------2024/6/5 by jicc---------')
     
