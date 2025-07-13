@@ -2324,12 +2324,23 @@ def fpynewtrs_inf_to_list_s(sheet0, colidno0, sheet1, colidno1):
     nlbcs.fpydriver_quit(driver)
     return trs_inf01
 
-#fpytrs_infs_to_xlsx########################################################
+#fpytrs_infs_to_xlsx########################################chghistory####
 """
 fpytrs_infs_to_xlsx:
     search and save individual transfer informations to Excelfile
     v1.0
     2022/7/26
+    @author: jicc
+    
+    v1.1 : 例外処理に　"StaleElementReferenceException" を追加した。 1)
+            改善のため、nlbcs.fpytrsinf_to_xlsx に変更をくわえた。
+            2)に　row_num1 = row_num1+1を追加した。
+    2025/7/6
+    @author: jicc
+    
+    v1.11 : 3) 例外で、検索漏れのidNoのリスト、idno1_notfound, stale_element_notfound
+    を Excel sheet wbN1/idno1_notfound, stale_element_notfound に書き出す処理を加えた。
+    2025/7/9
     @author: jicc
     
 """
@@ -2360,9 +2371,10 @@ def fpytrs_infs_to_xlsx(wbN0, sheetN0, wbN1, sheetN1, colidno1):
 
     """
     import nlbcs
-    #import chghistory
+    import fmstls
     import time
     from selenium.common.exceptions import NoSuchElementException
+    from selenium.common.exceptions import StaleElementReferenceException
     
     wb0obj = fpyopenxl(wbN0, sheetN0) #[wb0, sheet0]
     wb0 = wb0obj[0] #ex. AB_cowshistory.xlsx
@@ -2370,26 +2382,140 @@ def fpytrs_infs_to_xlsx(wbN0, sheetN0, wbN1, sheetN1, colidno1):
     #max_row0 = sheet0.max_row
     
     wb1obj = fpyopenxl(wbN1, sheetN1) #[wb1, sheet1]
-    #wb1 = wb1obj[0] #ex. AB_cowslist.xlsx
+    wb1 = wb1obj[0] #ex. AB_cowslist.xlsx
     sheet1 = wb1obj[1] #ex. cowslist
     max_row1 = sheet1.max_row 
     
     driver = nlbcs.fpyopen_url("https://www.id.nlbc.go.jp/CattleSearch/search/agreement")
     nlbcs.fpyname_click(driver, "method:goSearch") 
+    idno1_notfound = list()
+    stale_element_notfound = list()
     for row_num1 in range(2, max_row1 + 1):
         
         idno1 = fpygetCell_value(sheet1, row_num1, colidno1)
         
         try:
 
-            nlbcs.fpytrsinf_to_xlsx(driver, idno1, sheet0)            
+            nlbcs.fpytrsinf_to_xlsx(driver, idno1, sheet0)
             
         except NoSuchElementException:
              print("Error: " + idno1 + " not found")
+             print("*****")
+             idno1_notfound.append(idno1)
+        except StaleElementReferenceException:      #1)
+            print(idno1 + ":stale element reference: stale element not found")
+            print("*****")
+            stale_element_notfound.append(idno1)
+        
+        row_num1 = row_num1+1       #2)
     
     wb0.save(wbN0)
     time.sleep(3)
     nlbcs.fpydriver_quit(driver)
+    
+    #3)
+    #検索できなかったidNosのリストidno1_notfound, stale_element_notfoundを
+    #sheet 'idno_notfound', 'stale_element_notfound'にリストアップする。
+    sheet_names = wb1.get_sheet_names()
+    
+    
+    if 'idno_notfound' not in sheet_names:
+        sheet2 = fmstls.fpyNewSheet_w(wb1, 'idno_notfound', 'columns', 1)
+    
+    sheet2 = fmstls.fpylist_to_xls_column_s(sheet2, 2, idno1_notfound)
+    
+    print('idno1_notfound')
+    print(idno1_notfound)
+     
+    if 'stale_element_notfound' not in sheet_names:
+        sheet3 = fmstls.fpyNewSheet_w(wb1, 'stale_element_notfound', 'columns', 1)
+    
+    sheet3 = fmstls.fpylist_to_xls_column_s(sheet3, 2, stale_element_notfound)
+    print('stale_element_notfound')
+    print(stale_element_notfound)
+    
+    wb1.save(wbN1) 
+    #3)
+
+#fpytrs_infs_to_xlsx_idnos_list##################################chghistory##
+"""
+fpytrs_infs_to_xlsx_idnos_list:
+    search and save individual transfer informations from list to Excelfile
+    idNos' list version
+    v1.0
+    2025/7/6
+    @author: jicc
+    
+"""
+def fpytrs_infs_to_xlsx_idnos_list(wbN, sheetN, idnoslst ):
+    """
+    search and save individual transfer informations from list to Excelfile
+    idNos' list version
+    v1.0
+    2025/7/6
+    @author: jicc
+    
+    Parameters
+    ----------
+    wbN : str
+        Excelfile name of originaldata
+        ex. "AB_cowhistory.xlsx"
+    sheetN : str
+        sheet name
+        ex. "ABFarm"
+    idnoslst: list
+        idnos'list
+
+    Returns
+    -------
+    None.
+
+    """
+    import nlbcs
+    #import chghistory
+    import time
+    from selenium.common.exceptions import NoSuchElementException
+    from selenium.common.exceptions import StaleElementReferenceException
+    
+    wbobj = fpyopenxl(wbN, sheetN) #[wb0, sheet0]
+    wb = wbobj[0] #ex. AB_cowshistory.xlsx
+    sheet = wbobj[1] #ex. ABFarm
+    #max_row0 = sheet0.max_row
+    
+    lidnoslst = len(idnoslst)
+    
+    driver = nlbcs.fpyopen_url("https://www.id.nlbc.go.jp/CattleSearch/search/agreement")
+    nlbcs.fpyname_click(driver, "method:goSearch") 
+    idno_notfound = list()
+    stale_element_notfound = list()
+    for i in range(0, lidnoslst):
+        
+        idno = idnoslst[i]
+        
+        try:
+
+            nlbcs.fpytrsinf_to_xlsx(driver, idno, sheet)
+            
+        except NoSuchElementException:
+             print("Error: " + idno + " not found")
+             print("*****")
+             idno_notfound.append(idno)
+        except StaleElementReferenceException:
+            print(idno + ":stale element reference: stale element not found")
+            print("*****")
+            stale_element_notfound.append(idno)
+        
+        i = i+1       # 1)
+    
+    wb.save(wbN)
+    time.sleep(3)
+    nlbcs.fpydriver_quit(driver)
+    
+    print('idno_notfound')
+    print(idno_notfound)
+
+    print('stale_element_notfound')
+    print(stale_element_notfound)
     
 #fpynewtrs_infs_to_xlsx######################################################    
 """
@@ -2654,6 +2780,9 @@ fpyarr_frmlsts_lst : arrange an individual and specific name's lists
     2) ixllists__No < lxllists ->  ixllists_No < ixllistsNo に変更
     v1.01
     2023/12/24
+    *) xllists_ = [] の場合を除外
+    v1.02
+    2024/9/3
     @author: jicc
     
 """
@@ -2681,40 +2810,41 @@ def fpyarr_frmlsts_lst( xllists, xllists_):
     lxllists_ = len(xllists_)
     print("lxllists_")
     print(lxllists_)
-
-    reason_to_transfer = xllists_[lxllists_-1][7] 
-    #xllists_　最後の要素の"異動内容"
-    print("reason_to_transfer")
-    print(reason_to_transfer)
- 
-    if reason_to_transfer == "出生" or reason_to_transfer == "転入": # 1)
-        
-        xllistsNo = xllists[lxllists-1][6] # 2)
-        #xllists　最後の要素の"No"
-        ixllistsNo = int(xllistsNo) # 2*)
-        
-        xllists_No = xllists_[lxllists_-1][6]
-        #xllists_　最後の要素の"No"
-        ixllists_No = int(xllists_No)
-        
-        if ixllists_No < ixllistsNo: # 2)
-            #xllists_の最後の要素のあとに、xllsitsの要素がある場合
-            # "転出"が記載されていなくて、他所に"搬入", "転入"など異動している。
-        
-            tmp = xllists[ixllists_No]
-            #xllistsで、xllists_最後の要素の次の要素
-            print('tmp')
-            print(tmp)
-            tmp[7] = "転出"  #"転出"に変更
-            tmp[9] = xllists_[lxllists_-1][9]   #"住所"を変更
-            tmp[10] = xllists_[lxllists_-1][10] #"氏名または名称"を変更
-            print('tmp')
-            print(tmp)
-        
-            xllists_.append(tmp) #tmpをxllists_に追加して、転出した状態にする。
     
-    print("arranged xllists_")
-    print(xllists_)
+    if lxllists_>0:                                 # *)
+        reason_to_transfer = xllists_[lxllists_-1][7] 
+        #xllists_　最後の要素の"異動内容"
+        print("reason_to_transfer")
+        print(reason_to_transfer)
+ 
+        if reason_to_transfer == "出生" or reason_to_transfer == "転入": # 1)
+        
+            xllistsNo = xllists[lxllists-1][6] # 2)
+            #xllists　最後の要素の"No"
+            ixllistsNo = int(xllistsNo) # 2*)
+        
+            xllists_No = xllists_[lxllists_-1][6]
+            #xllists_　最後の要素の"No"
+            ixllists_No = int(xllists_No)
+        
+            if ixllists_No < ixllistsNo: # 2)
+                #xllists_の最後の要素のあとに、xllsitsの要素がある場合
+                # "転出"が記載されていなくて、他所に"搬入", "転入"など異動している。
+        
+                tmp = xllists[ixllists_No]
+                #xllistsで、xllists_最後の要素の次の要素
+                print('tmp')
+                print(tmp)
+                tmp[7] = "転出"  #"転出"に変更
+                tmp[9] = xllists_[lxllists_-1][9]   #"住所"を変更
+                tmp[10] = xllists_[lxllists_-1][10] #"氏名または名称"を変更
+                print('tmp')
+                print(tmp)
+        
+                xllists_.append(tmp) #tmpをxllists_に追加して、転出した状態にする。
+    
+        print("arranged xllists_")
+        print(xllists_)
 
     return xllists_
 
@@ -3061,6 +3191,9 @@ fpysep_outfrmin
     xllists_org を廃止
     v1.01
     2024/1/13
+    **) xllists_ = [] 当該牧場の情報がない場合を場合分け
+    v1.02
+    2024/9/3
     @author: jicc
     
 """
@@ -3105,8 +3238,8 @@ def fpysep_outfrmin( wbN, sheetN, coln, ncol, index, name, bdate ):
     
     #sheet 上の columns coln(個体識別番号)の要素のリストを作成
     idNos = fpyelems_lstfrmxls_lst_s(sheet, coln)
-    print('idNos')
-    print(idNos)
+    #print('idNos')
+    #print(idNos)
 
     lidNos = len(idNos)
 
@@ -3124,46 +3257,51 @@ def fpysep_outfrmin( wbN, sheetN, coln, ncol, index, name, bdate ):
         xllists_ = fpyext_frmlsts_lst(xllists, index, name)
         #index 10 : "氏名または名称"
         #当該牧場の異動情報だけ抽出
-
-        xllists_.sort(key = lambda x:x[8]) #, reverse=True
-        #lists' listを 異動年月日 昇順 でsort lambda関数を利用
+        lxllists_ = len(xllists_)
+        if lxllists_ > 0:                               # **)
+            xllists_.sort(key = lambda x:x[8]) #, reverse=True
+            #lists' listを 異動年月日 昇順 でsort lambda関数を利用
         
-        print("xllists_")
-        print(xllists_)
+            #print("xllists_")
+            #print(xllists_)
         
-        xllists_ = fpyarr_frmlsts_lst( xllists, xllists_ )   # *)
-        #最後の"転出"が欠けていた場合の調整
-        print("xllists_")
-        print(xllists_)
+            xllists_ = fpyarr_frmlsts_lst( xllists, xllists_ )   # *)
+            #最後の"転出"が欠けていた場合の調整
+            print("xllists_")
+            print(xllists_)
         
-        terms_in_farm = fpyterms_in_farm_( xllists_ )
-        #当該牧場にいた滞在期間
-        print("terms_in_farm")
-        print(terms_in_farm)
+            terms_in_farm = fpyterms_in_farm_( xllists_ )
+            #当該牧場にいた滞在期間
+            print("terms_in_farm")
+            print(terms_in_farm)
         
-        #bdate = '2023/12/31'
-        print(bdate)
-        #基準日
-        if type(bdate) == str: 
-            bdate = datetime.datetime.strptime(bdate, '%Y/%m/%d')
-            #datetimeに変換
-        print('bdate')
-        print(bdate)
+            #bdate = '2023/12/31'
+            print(bdate)
+            #基準日
+            if type(bdate) == str: 
+                bdate = datetime.datetime.strptime(bdate, '%Y/%m/%d')
+                #datetimeに変換
+                print('bdate')
+                print(bdate)
         
-        belongornot = fpyind_belongornot( bdate, terms_in_farm )
-        #基準日にその農場に所属していたかどうか
-        print('belongornot')
-        print(belongornot)
+            belongornot = fpyind_belongornot( bdate, terms_in_farm )
+            #基準日にその農場に所属していたかどうか
+            print('belongornot')
+            print(belongornot)
         
-        if belongornot == 0: #move-out
+            if belongornot == 0: #move-out
+                for k in range(0, lxllists):
+                    fpylisttoxls_s(xllists[k], 1, sheetout)
+                    #wb.save('..\CD_cowshistory.xlsx')
+        
+            elif belongornot == 1: #move-in belonging
+                for k in range(0, lxllists):
+                    fpylisttoxls_s(xllists[k], 1, sheetin)
+                    #wb.save('..\CD_cowshistory.xlsx')
+        elif lxllists_ == 0: #当該牧場に所属しない牛の異動情報
             for k in range(0, lxllists):
                 fpylisttoxls_s(xllists[k], 1, sheetout)
-                #wb.save('..\CD_cowshistory.xlsx')
-        
-        elif belongornot == 1: #move-in belonging
-            for k in range(0, lxllists):
-                fpylisttoxls_s(xllists[k], 1, sheetin)
-                #wb.save('..\CD_cowshistory.xlsx')
+            
                 
     wb.save(wbN)
 
@@ -3292,6 +3430,11 @@ def fpychghistoryReference():
     print('....................................................................................')
     print('**fpytrs_infs_to_xlsx(wbN0, sheetN0, wbN1, sheetN1, colidno1)')
     print('search and save individual transfer informations to Excelfile')
+    print('....................................................................................')
+    print('**fpytrs_infs_to_xlsx_idnos_list(wbN, sheetN, idnoslst )')
+    print('search and save individual transfer informations from list to Excelfile')
+    print('idNos\' list version')
+    print('unused!')
     print('....................................................................................')
     print('**fpynewtrs_infs_to_xlsx(wbN0, sheetN0, colidno0, wbN1, sheetN1, colidno1)')
     print('search individual transfer informations')

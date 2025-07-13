@@ -486,6 +486,9 @@ fpyreg_newcows : register new cows from a new cowslist
     
     v1.0
     2024/2/11
+    *) ゴミと思われる　'xllists1[1]' を削除
+    v1.01
+    2024/9/5
     @author: jicc
     
 """
@@ -557,7 +560,7 @@ def fpyreg_newcows( wbN, sheetN, snewN, ncol ):
     print('xllists1')
     l1 = len(xllists1)
     print(l1)
-    xllists1[1]
+    #xllists1[1]         #意味不明ゴミ? 削除2024/9/5     *)
     
     #新規牛のcowlist_id を修正する : modify cowlist_id of xllists0[k][0]
     l = lxllists+1
@@ -718,6 +721,91 @@ def fpyext_cwslst_at_base_date( wbN0, sN0, coln0, ncol0, index, name,
                   
     wb1.save(wbN1)
 
+
+#fpyinput_eartagno_frm_idno###################################cowslist########
+"""
+fpyinput_eartagno_frm_idno : 
+    input eartag No from cowidNo
+    個体識別番号をキーとして、
+    AIデータのリストから牧場固有の耳標を検索し、
+    個体リストに入力する。
+
+    v1.0
+    2025/7/10
+    @author: inoue
+    
+"""
+def fpyinput_eartagno_frm_idno(wb0N, sheet0N, col0, col0_eartag,
+                                       wb1N, sheet1N, col1, col1_eartag):
+    """
+    input eartag No from cowidNo
+
+    Parameters
+    ----------
+    wb0N : str
+        Excel file's name' : "Cowslist.xlsx"
+    sheet0N : str
+        sheet's name : "ABFarm"
+    col0 : int
+        column's number of idno : 2
+    col0_eartag : int
+        column's number of eartagno : 4(DHINo)
+    wb1N : str
+        Excel file's name' : "AIData.xlsx", "MH_AI.xlsx"
+    sheet1N : str
+        sheet's name : "ABFarm", "MH_AI"
+    col1 : int
+        column's number of idno : 2
+    col1_eartag : int
+        column's number of eartagno : 4(DHINo)
+
+    Returns
+    -------
+    None.
+
+    """
+    
+    wb0, sheet0 = fmstls.fpyopenxl_(wb0N, sheet0N)
+    
+    wb1, sheet1 = fmstls.fpyopenxl_(wb1N, sheet1N)
+    
+    for i in range(2,sheet0.max_row+1):
+        
+        #sheet0, row i : get an idNo 
+        #sheet0 i行の個体識別番号を取得する
+        idNo0_i = fmstls.fpygetCell_value(sheet0, i, col0)
+        
+        for j in range(2, sheet1.max_row+1):
+            
+            #sheet1, row j : get an idNo 
+            #sheet1 j行の個体識別番号を取得する
+            idNo1_j = fmstls.fpygetCell_value(sheet1, j, col1)
+            #get an eartagno(DHINo etc.) from sheet1(AI data)
+            #sheet1(AIデータ)から、耳標番号（検定番号など)　を得る
+            eartagno_j = fmstls.fpygetCell_value(sheet1, j, col1_eartag)
+            # case eartagno_j is None : do nothing
+            #耳標番号のない場合は、何もしない
+            if eartagno_j == None or eartagno_j == ' ':
+                #print('None')
+                continue
+            
+            else:
+                
+                if idNo1_j == idNo0_i: 
+                   #if sheet0/column col0_eartag is None, input eartagno_i to this column
+                   #sheet0/column col0_eartag に値がなければ、eartagno_jを入力する。
+                   fmstls.fpyifNone_inputCell_value(sheet0, i, col0_eartag, eartagno_j)
+                   break
+                else:
+                    #print('!=')                    
+                    continue
+            
+            j = j+1
+            
+        i = i+1
+
+    wb0.save(wb0N)
+
 #fpycowslistManual###########################################################
 '''
     AB_cowslist.xlsx 作成のための　PS用マニュアル
@@ -820,6 +908,32 @@ def fpycowslistManual00():
     print('---------------------------------------------------------2024/2/18 by jicc---------')
     
     
+#fpycowslisttoolsReference############################################################
+def fpycowslisttoolsReference():
     
+    print('-----cowslisttoolsReference --------------------------------------------v1.00------')
+    print('** PS> python ps_fpyinput_listidno_args.py WbN sheetN col')
+    print(' wbN : Cowslist.xlsx, sheetN : ABFarm, col : 1')
+    print('cowslist 作成時に　1列　cowidno を1行目から連番で入力する')
+    print('------------------------------------------------------------------')
+    print('** PS> python ps_fpyinput_eartagno_frm_idno_args.py ')
+    print(' wb0N, sheet0N, col0, col0_eartag, wb1N, sheet1N, col1, col1_eartag')
+    print(' \'Cowslist.xlsx\', \'MHFarm\', 2, 4, \'AIData.xlsx\', \'MHFarm\', 2, 4')
+    print('input eartag No from cowidNo ')
+    print('------------------------------------------------------------------')
+    
+    print('---------------------------------------------------------2025/7/9 by jicc---------')
+    
+#fpycowslistReference#####################################################################
+def fpycowslistReference():
+    
+    print('-----cowslistReference -------------------------------------------v1.00------')
+    print('**fpyinput_eartagno_frm_idno(wb0N, sheet0N, col0, col0_eartag,')
+    print('                                 wb1N, sheet1N, col1, col1_eartag)')
+    print('input eartag No from cowidNo ')     
+    print('個体識別番号をキーとして、 AIデータのリストから牧場固有の耳標を検索し、個体リストに入力する。') 
+    print('---------------------------------------------------------2025/7/10 by jicc----')
+     
+     
     
     

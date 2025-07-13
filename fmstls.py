@@ -37,6 +37,39 @@ def fpyopenxl(wbN, sheetN):
     sheet = wb[sheetN]
     return [wb, sheet]
 
+#fpyopenxl_##############################################################
+"""
+fpyopenxl_(wbN, sheetN):
+    Excelfile wbN.xlsx　sheet sheetN Open 
+    v1.00
+    return value is not list version
+    2025/6/19
+    @author: jicc
+    
+"""
+def fpyopenxl_(wbN, sheetN):
+    """
+    Excelfile wbN.xlsx　sheet sheetN Open
+
+    Parameters
+    ----------
+    wbN : str
+        ExcelFile Name   ex.MH_CowHistory.xlsx
+    sheetN : str
+        sheet name
+
+    Returns
+    -------
+    object : wb, sheet
+    """
+    
+    #import openpyxl
+    
+    
+    wb = openpyxl.load_workbook(wbN)
+    sheet = wb[sheetN]
+    return wb, sheet
+
 #fpyopencsv_robj#
 """
 fpyopencsv_robj:
@@ -101,6 +134,10 @@ def fpyopencsv_rdata(csvN):
     filename_file = open(csvN)     #csvfile open
     filename_reader = csv.reader(filename_file)       #get Reader object
     filename_data = list(filename_reader)             #list's list
+    #UnicodeDecodeError: 
+    #'cp932' codec can't decode byte 0xef in position 0: illegal multibyte sequence
+    #->filename_file = open(csvN, 'r',encoding="utf-8")
+    #2024/8/2
     
     return filename_data
     
@@ -131,6 +168,172 @@ def fpyopencsv_w(csvN):
     output_writer = csv.writer(output_file)       #get Reader object
      
     return output_writer
+
+#fpycsv_to_list##############################################################
+"""
+fpycsv_to_list : 
+    return a csvfile as a list of each row
+    v1.0
+    2024/8/6
+    @author: inoue
+"""
+def fpycsv_to_list( csvN ):
+    """
+    return a csvfile as a list of each row
+
+    Parameters
+    ----------
+    csvN : str
+        csv file name  ex. r'csv\tmp.csv'
+
+    Returns
+    -------
+    csv_rows : list
+
+    """
+    import csv
+
+    csv_rows = []
+
+    with open( csvN,'r',encoding='utf-8-sig') as f:        #,newline=''
+        f_reader = csv.reader(f)
+        
+        for row in f_reader:
+            csv_rows.append(row)
+            
+    return csv_rows
+    
+    #with~ では　f.close()　不要
+
+#fpyidNo_9to10_list#########################################################
+"""
+fpyidNo_9to10 : ９～10桁耳標の数値を文字列として、
+    9桁の耳標に1桁目に０を加え10桁とする
+    list version
+    ｖ1.0
+    2024/8/7
+    @author: jicc
+"""
+def fpyidNo_9to10_list(csv_rows, col):
+    """
+    ９～10桁耳標の数値を文字列として、
+    9桁の耳標に1桁目に０を加え10桁とする
+    Parameters
+    ----------
+    csv_rows : list
+        a list of a csvfile's each row
+    col : int
+        index number of column idNo
+
+    Returns
+    -------
+    csv_rows : list
+
+    """
+    lcsv_rows = len(csv_rows)
+    
+    for row_num in range(1, lcsv_rows):     #先頭行をスキップ
+        
+        idNo = csv_rows[row_num][col]
+        idNo = str(idNo)                    #不要かも
+        if len(idNo) == 9:
+            idNo = '0' + idNo
+            #idNo = str(idNo)
+            csv_rows[row_num][col] = idNo               # "'0" + idNo
+        else:
+            #idNo = "'" + idNo
+            #idNo = str(idNo)
+            csv_rows[row_num][col] = idNo 
+
+    return csv_rows
+
+#fpylist_to_csv_p##############################################################
+"""
+fpylist_to_csv : 
+    a list of each row to a csv file
+    print version
+    v1.0
+    2024/8/6
+    @author: inoue
+"""
+def fpylist_to_csv_p( csv_rows, csvN ):
+    """
+    return a csvfile as a list of each row
+
+    Parameters
+    ----------
+    csv_rows : list
+        
+    csvN : str
+        csv file name  ex. r'csv\tmp.csv'
+
+    Returns
+    -------
+    csv_rows : list
+
+    """
+    #import csv
+
+    with open( csvN,'w',newline='',encoding='utf-8-sig') as f: 
+        
+        for row in csv_rows:
+            print(*row, sep=",", file=f)
+            
+    #with~ では　f.close()　不要
+
+#fpylist_to_csv_w##############################################################
+"""
+fpylist_to_csv_w : 
+    a list of each row to a csv file
+    writer version
+    v1.0
+    2024/8/6
+    @author: inoue
+"""
+def fpylist_to_csv_w( csv_rows, csvN ):
+    """
+    return a csvfile as a list of each row
+
+    Parameters
+    ----------
+    csv_rows : list
+        
+    csvN : str
+        csv file name  ex. r'csv\tmp.csv'
+
+    Returns
+    -------
+    csv_rows : list
+
+    """
+    import csv
+
+    with open( csvN,'w',newline='',encoding='utf-8-sig') as f: 
+        f_writer = csv.writer(f)
+
+        for row in csv_rows:
+            f_writer.writerow(row)
+            
+    #with~ では　f.close()　不要
+
+#fpyidNo_9to10_csvfile########################################################
+"""
+fpyidNo_9to10_csvfile:
+    9桁耳標を10桁にし、文字列として再入力する
+    csv version
+    v1.0
+    2024/8/7
+    @author: inoue
+    
+"""
+def fpyidNo_9to10_csvfile( csvN, col ):
+    
+    
+    csv_rows = fpycsv_to_list( csvN )
+    
+    csv_rows = fpyidNo_9to10_list(csv_rows, col)
+    
+    fpylist_to_csv_p( csv_rows, csvN )
 
 
 #fpygetCell_value#
@@ -225,7 +428,138 @@ def fpyifNone_inputCell_value(sheet, r, col, vl):
     if Cellvalue == None:
         sheet.cell(row=r, column=col).value = vl    
 
-#fpyidNo_9to10#
+#fpyget_clmvalue_s_list######################################fmstls###
+"""
+fpyget_clmvalue_s_list: get a culumn values' list  from another list
+    
+    v1.00
+    2025/6/19
+    @author: inoue
+    
+"""
+def fpyget_clmvalue_s_list(wbN, sheetN, col):
+    """
+    get a culumn values' list  from another list
+
+    Parameters
+    ----------
+    wbN : str
+        ExcelFile Name   ex.AIData.xlsx
+    sheetN : str
+        sheet name       ex.MHFarm
+    col : int
+        column's No of cowidNo
+    Returns
+    -------
+    cowidNo_s_list : list
+
+    """
+    wb, sheet = fpyopenxl_(wbN, sheetN)
+    
+    clmvalue_s_list = list()
+    
+    for i in range(2,sheet.max_row + 1):
+        
+        clmvalue_i = fpygetCell_value(sheet, i, col)
+        if clmvalue_i not in clmvalue_s_list:
+            clmvalue_s_list.append(clmvalue_i)
+        else:
+            continue
+        
+    clmvalue_s_list.sort()
+    
+    return clmvalue_s_list
+
+#fpylist_to_xls_column##################################fmstls#####
+"""
+fpylist_to_xls_column: 
+    transfer elements from a list to a column of excel sheet
+    
+    v1.00
+    2025/6/24
+    @author: jicc
+    
+"""
+def fpylist_to_xls_column(wbN, sheetN, col, lst):
+    """
+    transfer elements from a list to a column of excel sheet
+
+    Parameters
+    ----------
+    wbN : str
+        ExcelFile Name   ex.CowsList.xlsx
+    sheetN : str
+        sheet name       ex.MHFarm
+    col : int
+        column's No of cowidNo
+    lst : list
+        cosidNos' list
+
+    Returns
+    -------
+    None.
+
+    """
+    wb, sheet = fpyopenxl_(wbN, sheetN)
+    max_row = sheet.max_row
+    
+    llst = len(lst)
+    
+    for i in range(0, llst):
+        
+        fpyinputCell_value(sheet, max_row+1, col, lst[i])
+        
+        print(max_row+1)
+        print(lst[i])
+        
+        max_row = max_row+1
+
+    wb.save(wbN)
+
+#fpylist_to_xls_column_s################################fmstls#####
+"""
+fpylist_to_xls_column_s: 
+    transfer elements from a list to a column of excel sheet
+    sheet version
+    v1.00
+    2025/7/8
+    @author: jicc
+    
+"""
+def fpylist_to_xls_column_s(sheet, col, lst):
+    """
+    transfer elements from a list to a column of excel sheet
+
+    Parameters
+    ----------
+    sheet : worksheet.worksheet.Worksheet
+         worksheet object
+    col : int
+        column's No of cowidNo
+    lst : list
+        cosidNos' list
+
+    Returns
+    -------
+    None.
+
+    """
+    max_row = sheet.max_row
+    
+    llst = len(lst)
+    
+    for i in range(0, llst):
+        
+        fpyinputCell_value(sheet, max_row+1, col, lst[i])
+        
+        print(max_row+1)
+        print(lst[i])
+        
+        max_row = max_row+1
+
+    return sheet
+
+#fpyidNo_9to10###################################################
 """
 fpyidNo_9to10 : ９～10桁耳標の数値を文字列として、
     9桁の耳標に1桁目に０を加え10桁とする
@@ -1411,12 +1745,99 @@ def fpyyyyymmdd_to_strdate( yyyymmdd ):
     
     return strdate
 
+#fpymkidNo_rdr############################################################
+"""
+fpymkidNo_rdr: 
+    make temporary idNo from cows' and heifers' Cowcode
+v1.0
+csv module version
+2023/4/8
+@author: inoue
+"""
+def fpymkidNo_rdr( fcsvN, col_ccd, col_idNo, idNo_ ):    
+    '''
+    make temporary idNo from cows' and heifers' Cowcode
+
+    Parameters
+    ----------
+    fcsvN : str
+        csvfile Name to make temporary idNo  ex.'yyyymmddCow01'
+    col_ccd : int
+        column's No of cowcode 牛ｺｰﾄﾞ (Farm's eartagNo,DHINo etc)
+    col_idNo : int
+        column's No of idNo 個体識別番号
+    idNo_ : str
+        strings of 5 figures  ex. '12345'
+    Returns
+    -------
+    None.
+
+    '''
+    import csv
+    
+    csv_file = open( fcsvN, encoding="utf-8" )
+    csv_reader = csv.reader( csv_file )
+    csv_data = list( csv_reader )
+    
+    for i in range(1, len(csv_data)):
+        code = csv_data[i][col_ccd]
+        if code == '':  #Farm' DHINo ない場合は、idNoの4桁番号をcode とする
+            cowidNo = csv_data[i][col_idNo]
+            code = cowidNo[-5:-1]
+                   
+        code = str(code)
+        lcode = len(code)
+        if lcode == 4:
+            code = code
+        elif lcode ==3:
+            code = '0' + code
+        elif lcode == 2:
+            code = '00' + code
+        elif lcode == 1:
+            code = '000' + code
+        else:
+            code = 'error'
+        
+        if code != 'error' :
+            #make code to list     : code_l(st)  ['0', '1', '2', '3']
+            code_l = list(code)
+            #change list's elements to int and sum up all elements  : 
+            scode_l = int(code_l[0]) + int(code_l[1]) + int(code_l[2]) + int(code_l[3])
+            #change an element int to string   : s(tr)scode_l
+            sscode_l = str(scode_l)
+            #make sscode_l to list   : s(tr)s(um)code_l(st)l(st)
+            sscode_ll = list(sscode_l)
+            #a list length of sscode_ll   :  1 or 2
+            lsscode_ll = len(sscode_ll)
+            if lsscode_ll == 1:
+                idNo = idNo_ + code + sscode_ll[0]
+            elif lsscode_ll == 2:
+                idNo = idNo_ + code + sscode_ll[1]
+            
+            print(idNo)
+            #change idNos to each temporaly idNo in a list csv_data
+            csv_data[i][col_idNo] = idNo
+
+        else:
+            continue
+    #rewrite this list csv_data to csv file    
+    output_file = open( fcsvN, 'w', newline='', encoding="utf-8")
+    output_writer = csv.writer(output_file)
+    for j in range(0,len(csv_data)):
+        output_writer.writerow(csv_data[j])
+    
+    output_file.close()
+
 ######################################################################
 def fpyfmstlsReference():
     
-    print('-----fmstlsReference ---------------------------------------------------v1.05------')
+    print('-----fmstlsReference ---------------------------------------------------v1.07------')
     print('**fpyopenxl(wbN, sheetN)')
     print('Excelfile wbN.xlsx　sheet sheetN Open ')
+    print('...................................................................................')
+    print('**fpyopenxl_(wbN, sheetN)')
+    print('Excelfile wbN.xlsx　sheet sheetN Open ')
+    print('return value is not list version')
     print('...................................................................................')
     print('**fpyopencsv_robj(csvN)')
     print('csvfile Open for Reader object')
@@ -1426,6 +1847,29 @@ def fpyfmstlsReference():
     print('..................................................................................')
     print('**fpyopencsv_w(csvN)')
     print('csvfile Open for Writer')
+    print('..................................................................................')
+    print('**fpycsv_to_list( csvN )')
+    print('return a csvfile as a list of each row')
+    print('..................................................................................')
+    print('**fpyidNo_9to10_list(csv_rows, col)')
+    print('9桁の耳標に1桁目に０を加え10桁とする')
+    print('list version')
+    print('csv_rows:list, col: column\'s index')
+    print('..................................................................................')
+    print('**fpylist_to_csv_p( csv_rows, csvN )')
+    print('a list of each row to a csv file')
+    print('print version')
+    print('csv_rows:list, csvN: file pass')
+    print('..................................................................................')
+    print('**fpylist_to_csv_w( csv_rows, csvN )')
+    print('a list of each row to a csv file')
+    print('writer version')
+    print('csv_rows:list, csvN: file pass')
+    print('....................................................................................')
+    print('**fpyidNo_9to10_csvfile( csvN, col )')
+    print('9桁耳標を10桁にし、文字列として再入力する')
+    print('csv version')
+    print(' csvN:csv file name, col: columns_no')
     print('....................................................................................')
     print('**fpygetCell_value(sheet, r, col)')
     print('Excelシート上のセルの値を取得する')
@@ -1438,6 +1882,19 @@ def fpyfmstlsReference():
     print('**fpyifNone_inputCell_value(sheet, r, col, vl)')
     print('Excelシート上のセルに値がなければ、入力する')
     print('if Cellvalue is None,  input value to the Cell')
+    print('....................................................................................')
+    print('**fpyget_clmvalue_s_list(wbN, sheetN, col)')
+    print('Excel上のリストのcolumnの全値から、重複のないリストを作成ｓる...idNoのリストなど')
+    print('get a culumn values\' list  from another list')
+    print('....................................................................................')
+    print('**fpylist_to_xls_column(wbN, sheetN, col, lst)')
+    print('リストの値を、Excel sheet のcolumn に入力する')
+    print('transfer elements from a list to a column of excel sheet')
+    print('....................................................................................')
+    print('**fpylist_to_xls_column_s(sheet, col, lst)')
+    print('sheet version')
+    print('リストの値を、Excel sheet のcolumn に入力する')
+    print('transfer elements from a list to a column of excel sheet')
     print('....................................................................................')
     print('**fpyidNo_9to10(wbN, sheetN, col)')
     print('9桁耳標を10桁にし、文字列として再入力する')
@@ -1541,5 +1998,8 @@ def fpyfmstlsReference():
     print('....................................................................................')
     print('**fpyyyyymmdd_to_strdate( yyyymmdd )')
     print('change str yyyymmdd to str date yyyy/mm/dd')
-    print('----------------------------------------------------------2024/6/5 by jicc---------')
+    print('....................................................................................')
+    print('**fpymkidNo_rdr( fcsvN, col_ccd, col_idNo, idNo_ )')
+    print(' make temporary idNo from cows\' and heifers\' Cowcode')
+    print('----------------------------------------------------------2025/7/8 by jicc---------')
     
